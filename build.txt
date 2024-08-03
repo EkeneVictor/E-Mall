@@ -1,0 +1,35 @@
+Creating a more sophisticated shopping mall application with distinct interfaces for customers and mall owners (admins) involves several steps. This requires a clear design, a robust backend, and a user-friendly GUI. Here's a structured approach to achieve this:
+
+Key Features
+User Authentication
+
+Separate login for customers and admins.
+Session management.
+Mall Selection
+
+Display available malls to customers after login.
+Allow customers to select a mall to view and purchase products.
+Admin Interface
+
+Allow admins to upload credentials for their malls.
+Admins can manage products, view sales, and manage inventory.
+Customer Interface
+
+Display products available in the selected mall.
+Allow customers to add products to the cart and proceed to checkout.
+Implementation Plan
+Define Core Logic
+
+Implement classes for users, malls, products, inventory, customers, and shopping cart.
+Design GUI with PyQt
+
+Create separate interfaces for customer and admin.
+Use Qt Designer to design the UI for different roles.
+Integrate Core Logic with GUI
+
+Connect GUI elements to the corresponding logic.
+Handle user inputs and update the interface accordingly.
+Database Integration
+
+Use SQLite or another database to persist data.
+Store user credentials, mall details, product information, and transactions.
