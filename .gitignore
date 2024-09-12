@@ -23,6 +23,9 @@
 ./app/charttest.py
 ./app/main_app_iui.py
 ./app/main_app_ui.py
-./app/omoomr.py
+
 ./app/omorr.py
 ./app/trash5.py
+git rm --cached ./app/omorr.py
+
+
