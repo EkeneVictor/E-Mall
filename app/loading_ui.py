@@ -15,19 +15,37 @@ class LoadingScreen(QWidget, Ui_Form):
         self.progress = 0
         self.timer.start(100)  # Update every 100 ms
 
+    # def log_out(self):
+    #     # Hide the current main window
+    #     self.hide()
+    #     print('Main window hidden')
+    #
+    #     # Show the login app
+    #     self.show_login_app()
+
     def show_login_app(self):
-        print('Successful login - opening main app window')
+        print('Showing login app')
 
-        # Initialize and show the main application window
-        from e_mall_mainwin import MainWindow
-        self.main_app_window = QtWidgets.QMainWindow()
-        self.main_app_ui = MainWindow(self.main_app_window)
-        self.main_app_ui.setupUi(self.main_app_window)
-        self.main_app_window.show()
-        self.close_loading_screen()
+        # Ensure the login window is not created multiple times
+        if hasattr(self, 'login_window') and self.login_window.isVisible():
+            return  # Login window already open
 
-    def close_loading_screen(self):
+        # Initialize and show the login window
+        from e_mall_mainwin import MainApp
+        self.login_window = MainApp()  # Replace with your actual login window class
+        self.login_window.show()
+
+        # Optionally, if you need to close the current window, use self.close() instead of self.hide()
         self.close()
+
+    # def show_login_app(self):
+    #     print('Successful login - opening main app window')
+    #
+    #     # Initialize and show the main application window
+    #     from e_mall_mainwin import MainApp
+    #     window = MainApp()
+    #     window.show()
+    #     self.close()
 
     def update_progress(self):
         self.progress += 1

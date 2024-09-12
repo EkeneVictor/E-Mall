@@ -71,7 +71,7 @@ class LoginWindow(QMainWindow):
             QMessageBox.warning(self, "Login Error", "Invalid username or password.")
 
 
-# Add further windows (CustomerWindow and AdminWindow) as needed...
+# Add further windows (CustomerWindow and MainApp) as needed...
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

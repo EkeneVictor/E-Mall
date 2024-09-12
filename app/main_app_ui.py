@@ -7,10 +7,11 @@
 
 
 from PyQt6 import QtCore, QtGui, QtWidgets
-from PyQt6.QtWidgets import QLabel, QPushButton
-from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, Qt, pyqtSignal
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QFrame, QLabel, QPushButton, QGridLayout
+from PyQt6 import uic
+from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, Qt, pyqtSignal, QTimer
 from utilities import *
-from e_mall_mainwin import Ui_MainWindow
+from e_mall_mainwin import MainApp
 import config
 import pymysql as sql
 
@@ -45,1240 +46,25 @@ def disconnect_button_signals(button):
         pass  # If the button has no signals connected, pass
 
 
-class MainAppUI(object):
+def update_product_stock(product_id, new_stock_quantity, mall_id):
+    config.product_stock_quantity = new_stock_quantity
+    update_product_stock_query = f"UPDATE `products` SET `quantity_in_stock` = %s WHERE `mall_id` = %s AND `product_id` = %s"
+    my_cur.execute(update_product_stock_query, (new_stock_quantity, mall_id, product_id))
+    conn_obj.commit()
+    # This function should be implemented to update the product's stock quantity in your database
+    pass
 
-    def __init__(self, main_window):
-        self.main_window = main_window
 
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(796, 600)
-        self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        self.body_frame = QtWidgets.QFrame(parent=self.centralwidget)
-        self.body_frame.setGeometry(QtCore.QRect(80, 50, 721, 531))
-        self.body_frame.setStyleSheet("background-color: rgb(0, 255, 255);")
-        self.body_frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.body_frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.body_frame.setObjectName("body_frame")
-        self.main_stacked_widget = QtWidgets.QStackedWidget(parent=self.body_frame)
-        self.main_stacked_widget.setGeometry(QtCore.QRect(50, 0, 661, 531))
-        self.main_stacked_widget.setObjectName("main_stacked_widget")
-        self.home_page = QtWidgets.QWidget()
-        self.home_page.setObjectName("home_page")
-        self.home_page_widget = QtWidgets.QStackedWidget(parent=self.home_page)
-        self.home_page_widget.setGeometry(QtCore.QRect(9, 9, 661, 521))
-        self.home_page_widget.setObjectName("home_page_widget")
-        self.malls_page = QtWidgets.QWidget()
-        self.malls_page.setObjectName("malls_page")
-        self.create_store_submit_button_2 = QtWidgets.QPushButton(parent=self.malls_page)
-        self.create_store_submit_button_2.setGeometry(QtCore.QRect(120, 490, 391, 31))
-        self.create_store_submit_button_2.setStyleSheet("\n"
-                                                        "QPushButton {\n"
-                                                        "                \n"
-                                                        "    background-color: blue;\n"
-                                                        "                border: none;\n"
-                                                        "                border-radius: 5px;\n"
-                                                        "                padding-left:20px;\n"
-                                                        "                color: white\n"
-                                                        "            }\n"
-                                                        "QPushButton:hover {\n"
-                                                        "                background-color: gray;\n"
-                                                        "            };\n"
-                                                        "    background-image: url(./images/plus-circle.png);\n"
-                                                        "")
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("./images/plus-circle.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
-        self.create_store_submit_button_2.setIcon(icon)
-        self.create_store_submit_button_2.setIconSize(QtCore.QSize(25, 25))
-        self.create_store_submit_button_2.setObjectName("create_store_submit_button_2")
-        self.scrollArea = QtWidgets.QScrollArea(parent=self.malls_page)
-        self.scrollArea.setGeometry(QtCore.QRect(-1, -11, 651, 501))
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.setObjectName("scrollArea")
-        self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 632, 1218))
-        self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
-        self.verticalLayout = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
-        self.verticalLayout.setObjectName("verticalLayout")
-        self.grid_frame = QtWidgets.QFrame(parent=self.scrollAreaWidgetContents)
-        self.grid_frame.setMinimumSize(QtCore.QSize(0, 1200))
-        self.grid_frame.setStyleSheet("background-color: rgb(85, 85, 0);")
-        self.grid_frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.grid_frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.grid_frame.setObjectName("grid_frame")
-        self.gridLayoutWidget = QtWidgets.QWidget(parent=self.grid_frame)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(0, 10, 611, 1181))
-        self.gridLayoutWidget.setObjectName("gridLayoutWidget")
-        self.gridLayout = QtWidgets.QGridLayout(self.gridLayoutWidget)
-        self.gridLayout.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetFixedSize)
-        self.gridLayout.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout.setObjectName("gridLayout")
-        self.verticalLayout.addWidget(self.grid_frame)
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-        self.home_page_widget.addWidget(self.malls_page)
-        self.create_store_page = QtWidgets.QWidget()
-        self.create_store_page.setObjectName("create_store_page")
-        self.form_frame = QtWidgets.QFrame(parent=self.create_store_page)
-        self.form_frame.setGeometry(QtCore.QRect(0, 10, 641, 501))
-        self.form_frame.setStyleSheet("border-radius: 20px;\n"
-                                      "border-color: rgb(0, 0, 255);")
-        self.form_frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.form_frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.form_frame.setObjectName("form_frame")
-        self.frame = QtWidgets.QFrame(parent=self.form_frame)
-        self.frame.setGeometry(QtCore.QRect(150, 10, 351, 431))
-        self.frame.setStyleSheet("background-color: rgb(255, 255, 255);")
-        self.frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.frame.setObjectName("frame")
-        self.mall_name_edit = QtWidgets.QLineEdit(parent=self.frame)
-        self.mall_name_edit.setGeometry(QtCore.QRect(90, 90, 231, 31))
-        self.mall_name_edit.setStyleSheet("font: 8pt \"CentSchbkCyrill BT\";\n"
-                                          "text-decoration: none;\n"
-                                          "border: 5px solid;\n"
-                                          "border-bottom-color: blue")
-        self.mall_name_edit.setText("")
-        self.mall_name_edit.setClearButtonEnabled(True)
-        self.mall_name_edit.setObjectName("mall_name_edit")
-        self.fill_in_details_label = QtWidgets.QLabel(parent=self.frame)
-        self.fill_in_details_label.setGeometry(QtCore.QRect(10, 10, 331, 31))
-        self.fill_in_details_label.setStyleSheet("border: none")
-        self.fill_in_details_label.setObjectName("fill_in_details_label")
-        self.mall_name_label = QtWidgets.QLabel(parent=self.frame)
-        self.mall_name_label.setGeometry(QtCore.QRect(20, 90, 61, 31))
-        self.mall_name_label.setStyleSheet("border: none")
-        self.mall_name_label.setObjectName("mall_name_label")
-        self.mall_address_label = QtWidgets.QLabel(parent=self.frame)
-        self.mall_address_label.setGeometry(QtCore.QRect(20, 170, 71, 31))
-        self.mall_address_label.setStyleSheet("border: none")
-        self.mall_address_label.setObjectName("mall_address_label")
-        self.mall_owner_label = QtWidgets.QLabel(parent=self.frame)
-        self.mall_owner_label.setGeometry(QtCore.QRect(30, 260, 61, 31))
-        self.mall_owner_label.setStyleSheet("border: none")
-        self.mall_owner_label.setObjectName("mall_owner_label")
-        self.mall_logo_label = QtWidgets.QLabel(parent=self.frame)
-        self.mall_logo_label.setGeometry(QtCore.QRect(30, 350, 61, 31))
-        self.mall_logo_label.setStyleSheet("border: none")
-        self.mall_logo_label.setObjectName("mall_logo_label")
-        self.mall_address_edit = QtWidgets.QLineEdit(parent=self.frame)
-        self.mall_address_edit.setGeometry(QtCore.QRect(90, 170, 231, 31))
-        self.mall_address_edit.setStyleSheet("font: 8pt \"CentSchbkCyrill BT\";\n"
-                                             "text-decoration: none;\n"
-                                             "border: 5px solid;\n"
-                                             "border-bottom-color: blue")
-        self.mall_address_edit.setText("")
-        self.mall_address_edit.setClearButtonEnabled(True)
-        self.mall_address_edit.setObjectName("mall_address_edit")
-        self.mall_owner_edit = QtWidgets.QLineEdit(parent=self.frame)
-        self.mall_owner_edit.setGeometry(QtCore.QRect(90, 260, 231, 31))
-        self.mall_owner_edit.setStyleSheet("font: 8pt \"CentSchbkCyrill BT\";\n"
-                                           "text-decoration: none;\n"
-                                           "border: 5px solid;\n"
-                                           "border-bottom-color: blue")
-        self.mall_owner_edit.setText("")
-        self.mall_owner_edit.setClearButtonEnabled(True)
-        self.mall_owner_edit.setObjectName("mall_owner_edit")
-        self.mall_logo_edit = QtWidgets.QLineEdit(parent=self.frame)
-        self.mall_logo_edit.setGeometry(QtCore.QRect(90, 350, 231, 31))
-        self.mall_logo_edit.setStyleSheet("font: 8pt \"CentSchbkCyrill BT\";\n"
-                                          "text-decoration: none;\n"
-                                          "border: 5px solid;\n"
-                                          "border-bottom-color: blue")
-        self.mall_logo_edit.setText("")
-        self.mall_logo_edit.setClearButtonEnabled(True)
-        self.mall_logo_edit.setObjectName("mall_logo_edit")
-        self.create_store_submit_button = QtWidgets.QPushButton(parent=self.form_frame)
-        self.create_store_submit_button.setGeometry(QtCore.QRect(200, 460, 251, 31))
-        self.create_store_submit_button.setStyleSheet("\n"
-                                                      "QPushButton {\n"
-                                                      "                \n"
-                                                      "    background-color: blue;\n"
-                                                      "                border: none;\n"
-                                                      "                border-radius: 5px;\n"
-                                                      "\n"
-                                                      "                color: white\n"
-                                                      "            }\n"
-                                                      "QPushButton:hover {\n"
-                                                      "                background-color: gray;\n"
-                                                      "            };\n"
-                                                      "")
-        self.create_store_submit_button.setObjectName("create_store_submit_button")
-        self.home_page_widget.addWidget(self.create_store_page)
-        self.store_page = QtWidgets.QWidget()
-        self.store_page.setObjectName("store_page")
-        self.products_scroll_area = QtWidgets.QScrollArea(parent=self.store_page)
-        self.products_scroll_area.setGeometry(QtCore.QRect(0, 10, 651, 471))
-        self.products_scroll_area.setWidgetResizable(True)
-        self.products_scroll_area.setObjectName("products_scroll_area")
-        self.products_scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.products_scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 632, 1218))
-        self.products_scrollAreaWidgetContents.setObjectName("products_scrollAreaWidgetContents")
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.products_scrollAreaWidgetContents)
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.products_grid_frame = QtWidgets.QFrame(parent=self.products_scrollAreaWidgetContents)
-        self.products_grid_frame.setMinimumSize(QtCore.QSize(0, 1200))
-        self.products_grid_frame.setStyleSheet("background-color: rgb(85, 85, 0);")
-        self.products_grid_frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.products_grid_frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.products_grid_frame.setObjectName("products_grid_frame")
-        self.gridLayoutWidget_2 = QtWidgets.QWidget(parent=self.products_grid_frame)
-        self.gridLayoutWidget_2.setGeometry(QtCore.QRect(0, 80, 611, 1111))
-        self.gridLayoutWidget_2.setObjectName("gridLayoutWidget_2")
-        self.gridLayout_2 = QtWidgets.QGridLayout(self.gridLayoutWidget_2)
-        self.gridLayout_2.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetFixedSize)
-        self.gridLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout_2.setObjectName("gridLayout_2")
-        self.mall_name_label_products = QtWidgets.QLabel(parent=self.products_grid_frame)
-        self.mall_name_label_products.setGeometry(QtCore.QRect(40, 20, 311, 41))
-        self.mall_name_label_products.setStyleSheet("QLabel {\n"
-                                                    "    color: #ffffff; /* Text color */\n"
-                                                    "    border: 2px solid #555555; /* Border */\n"
-                                                    "    border-radius: 10px; /* Rounded corners */\n"
-                                                    "    padding: 10px; /* Padding inside the label */\n"
-                                                    "    font-family: Arial, sans-serif; /* Font family */\n"
-                                                    "    font-size: 16px; /* Font size */\n"
-                                                    "    font-weight: bold; /* Font weight */\n"
-                                                    "    text-align: center; /* Text alignment */\n"
-                                                    "}")
-        self.mall_name_label_products.setObjectName("mall_name_label_products")
-        self.verticalLayout_2.addWidget(self.products_grid_frame)
-        self.products_scroll_area.setWidget(self.products_scrollAreaWidgetContents)
-        self.back_to_malls_page_button = QtWidgets.QPushButton(parent=self.store_page)
-        self.back_to_malls_page_button.setGeometry(QtCore.QRect(0, 490, 75, 23))
-        self.back_to_malls_page_button.setStyleSheet("\n"
-                                                     "QPushButton {\n"
-                                                     "                \n"
-                                                     "    background-color: blue;\n"
-                                                     "                border: none;\n"
-                                                     "                border-radius: 5px;\n"
-                                                     "\n"
-                                                     "                color: white\n"
-                                                     "            }\n"
-                                                     "QPushButton:hover {\n"
-                                                     "                background-color: gray;\n"
-                                                     "            };\n"
-                                                     "")
-        self.back_to_malls_page_button.setObjectName("back_to_malls_page_button")
-        self.home_page_widget.addWidget(self.store_page)
-        self.products_details_page = QtWidgets.QWidget()
-        self.products_details_page.setObjectName("products_details_page")
-        self.products_details_Frame = QtWidgets.QFrame(parent=self.products_details_page)
-        self.products_details_Frame.setGeometry(QtCore.QRect(0, 10, 641, 491))
-        self.products_details_Frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.products_details_Frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.products_details_Frame.setObjectName("products_details_Frame")
-        self.product_image_label = QtWidgets.QLabel(parent=self.products_details_Frame)
-        self.product_image_label.setGeometry(QtCore.QRect(230, 10, 161, 141))
-        self.product_image_label.setStyleSheet("border: 2px solid blue")
-        self.product_image_label.setText("")
-        self.product_image_label.setObjectName("product_image_label")
-        self.add_to_cart_button = QtWidgets.QPushButton(parent=self.products_details_Frame)
-        self.add_to_cart_button.setGeometry(QtCore.QRect(150, 250, 331, 21))
-        self.add_to_cart_button.setStyleSheet("\n"
-                                              "QPushButton {\n"
-                                              "                \n"
-                                              "    background-color: blue;\n"
-                                              "                border: none;\n"
-                                              "                border-radius: 5px;\n"
-                                              "\n"
-                                              "                color: white\n"
-                                              "            }\n"
-                                              "QPushButton:hover {\n"
-                                              "                background-color: gray;\n"
-                                              "            };\n"
-                                              "")
-        self.add_to_cart_button.setObjectName("add_to_cart_button")
-        self.product_name_label = QtWidgets.QLabel(parent=self.products_details_Frame)
-        self.product_name_label.setGeometry(QtCore.QRect(180, 160, 271, 16))
-        self.product_name_label.setStyleSheet("font: 20px \"CentSchbkCyrill BT\";\n"
-                                              "text-decoration: none;\n"
-                                              "text-align: center;")
-        self.product_name_label.setTextFormat(QtCore.Qt.TextFormat.AutoText)
-        self.product_name_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.product_name_label.setObjectName("product_name_label")
-        self.product_description_label = QtWidgets.QLabel(parent=self.products_details_Frame)
-        self.product_description_label.setGeometry(QtCore.QRect(120, 290, 381, 161))
-        self.product_description_label.setStyleSheet("text-align: center")
-        self.product_description_label.setAlignment(
-            QtCore.Qt.AlignmentFlag.AlignLeading | QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignTop)
-        self.product_description_label.setObjectName("product_description_label")
-        self.product_stock_quantity_label_ = QtWidgets.QLabel(parent=self.products_details_Frame)
-        self.product_stock_quantity_label_.setGeometry(QtCore.QRect(310, 200, 61, 16))
-        self.product_stock_quantity_label_.setStyleSheet("font: 15px \"CentSchbkCyrill BT\";\n"
-                                                         "text-decoration: none;")
-        self.product_stock_quantity_label_.setObjectName("product_stock_quantity_label_")
-        self.label = QtWidgets.QLabel(parent=self.products_details_Frame)
-        self.label.setGeometry(QtCore.QRect(210, 200, 121, 20))
-        self.label.setStyleSheet("font-size: 15px")
-        self.label.setObjectName("label")
-        self.back_to_products_page_button = QtWidgets.QPushButton(parent=self.products_details_Frame)
-        self.back_to_products_page_button.setGeometry(QtCore.QRect(0, 460, 75, 23))
-        self.back_to_products_page_button.setStyleSheet("\n"
-                                                        "QPushButton {\n"
-                                                        "                \n"
-                                                        "    background-color: blue;\n"
-                                                        "                border: none;\n"
-                                                        "                border-radius: 5px;\n"
-                                                        "\n"
-                                                        "                color: white\n"
-                                                        "            }\n"
-                                                        "QPushButton:hover {\n"
-                                                        "                background-color: gray;\n"
-                                                        "            };\n"
-                                                        "")
-        self.back_to_products_page_button.setObjectName("back_to_products_page_button")
-        self.product_price_label = QtWidgets.QLabel(parent=self.products_details_Frame)
-        self.product_price_label.setGeometry(QtCore.QRect(180, 180, 271, 16))
-        self.product_price_label.setStyleSheet("font: 20px \"CentSchbkCyrill BT\";\n"
-                                               "text-decoration: none;")
-        self.product_price_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.product_price_label.setObjectName("product_price_label")
-        self.label_3 = QtWidgets.QLabel(parent=self.products_details_Frame)
-        self.label_3.setGeometry(QtCore.QRect(270, 220, 61, 20))
-        self.label_3.setStyleSheet("font-size: 15px")
-        self.label_3.setObjectName("label_3")
-        self.quantity_edit = QtWidgets.QLineEdit(parent=self.products_details_Frame)
-        self.quantity_edit.setGeometry(QtCore.QRect(330, 220, 21, 20))
-        self.quantity_edit.setObjectName("quantity_edit")
-        self.home_page_widget.addWidget(self.products_details_page)
-        self.shopping_cart_frame = QtWidgets.QFrame(parent=self.home_page)
-        self.shopping_cart_frame.setGeometry(QtCore.QRect(439, -100, 0, 0))
-        self.shopping_cart_frame.setSizeIncrement(QtCore.QSize(0, 0))
-        self.shopping_cart_frame.setStyleSheet("background-color: rgb(16, 16, 16);\n"
-                                               "")
-        self.shopping_cart_frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.shopping_cart_frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.shopping_cart_frame.setObjectName("shopping_cart_frame")
-        self.buy_product_button = QtWidgets.QPushButton(parent=self.shopping_cart_frame)
-        self.buy_product_button.setGeometry(QtCore.QRect(130, 570, 61, 23))
-        self.buy_product_button.setStyleSheet("\n"
-                                              "QPushButton {\n"
-                                              "                \n"
-                                              "    background-color: green;\n"
-                                              "                border: none;\n"
-                                              "                border-radius: 5px;\n"
-                                              "                color: white\n"
-                                              "            }\n"
-                                              "QPushButton:hover {\n"
-                                              "                background-color: gray;\n"
-                                              "            };")
-        self.buy_product_button.setObjectName("buy_product_button")
-        self.clear_cart_button = QtWidgets.QPushButton(parent=self.shopping_cart_frame)
-        self.clear_cart_button.setGeometry(QtCore.QRect(40, 570, 61, 23))
-        self.clear_cart_button.setStyleSheet("\n"
-                                             "QPushButton {\n"
-                                             "                \n"
-                                             "    background-color: red;\n"
-                                             "                border: none;\n"
-                                             "                border-radius: 5px;\n"
-                                             "                color: white\n"
-                                             "            }\n"
-                                             "QPushButton:hover {\n"
-                                             "                background-color: gray;\n"
-                                             "            };")
-        self.clear_cart_button.setObjectName("clear_cart_button")
-        self.products_scroll_area_2 = QtWidgets.QScrollArea(parent=self.shopping_cart_frame)
-        self.products_scroll_area_2.setGeometry(QtCore.QRect(0, 100, 221, 431))
-        self.products_scroll_area_2.setWidgetResizable(True)
-        self.products_scroll_area_2.setObjectName("products_scroll_area_2")
-        self.products_scrollAreaWidgetContents_2 = QtWidgets.QWidget()
-        self.products_scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 202, 1218))
-        self.products_scrollAreaWidgetContents_2.setObjectName("products_scrollAreaWidgetContents_2")
-        self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.products_scrollAreaWidgetContents_2)
-        self.verticalLayout_3.setObjectName("verticalLayout_3")
-        self.cart_products_frame = QtWidgets.QFrame(parent=self.products_scrollAreaWidgetContents_2)
-        self.cart_products_frame.setEnabled(True)
-        self.cart_products_frame.setMinimumSize(QtCore.QSize(0, 1200))
-        self.cart_products_frame.setStyleSheet("background-color: rgb(16, 16, 16);")
-        self.cart_products_frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.cart_products_frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.cart_products_frame.setObjectName("cart_products_frame")
-        self.label_6 = QtWidgets.QLabel(parent=self.cart_products_frame)
-        self.label_6.setGeometry(QtCore.QRect(0, 0, 51, 16))
-        self.label_6.setStyleSheet("color: white;\n"
-                                   "font-size: 15px")
-        self.label_6.setObjectName("label_6")
-        self.label_10 = QtWidgets.QLabel(parent=self.cart_products_frame)
-        self.label_10.setGeometry(QtCore.QRect(70, 0, 51, 16))
-        self.label_10.setStyleSheet("color: white;\n"
-                                    "font-size: 15px")
-        self.label_10.setObjectName("label_10")
-        self.label_11 = QtWidgets.QLabel(parent=self.cart_products_frame)
-        self.label_11.setGeometry(QtCore.QRect(130, 0, 51, 16))
-        self.label_11.setStyleSheet("color: white;\n"
-                                    "font-size: 15px")
-        self.label_11.setObjectName("label_11")
-        self.gridLayoutWidget_3 = QtWidgets.QWidget(parent=self.cart_products_frame)
-        self.gridLayoutWidget_3.setGeometry(QtCore.QRect(0, 20, 61, 1181))
-        self.gridLayoutWidget_3.setObjectName("gridLayoutWidget_3")
-        self.gridLayout_5 = QtWidgets.QGridLayout(self.gridLayoutWidget_3)
-        self.gridLayout_5.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout_5.setObjectName("gridLayout_5")
-        self.gridLayoutWidget_4 = QtWidgets.QWidget(parent=self.cart_products_frame)
-        self.gridLayoutWidget_4.setGeometry(QtCore.QRect(70, 20, 51, 1181))
-        self.gridLayoutWidget_4.setObjectName("gridLayoutWidget_4")
-        self.gridLayout_6 = QtWidgets.QGridLayout(self.gridLayoutWidget_4)
-        self.gridLayout_6.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout_6.setObjectName("gridLayout_6")
-        self.gridLayoutWidget_5 = QtWidgets.QWidget(parent=self.cart_products_frame)
-        self.gridLayoutWidget_5.setGeometry(QtCore.QRect(130, 20, 51, 1181))
-        self.gridLayoutWidget_5.setObjectName("gridLayoutWidget_5")
-        self.gridLayout_7 = QtWidgets.QGridLayout(self.gridLayoutWidget_5)
-        self.gridLayout_7.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout_7.setObjectName("gridLayout_7")
-        self.verticalLayout_3.addWidget(self.cart_products_frame)
-        self.products_scroll_area_2.setWidget(self.products_scrollAreaWidgetContents_2)
-        self.label_5 = QtWidgets.QLabel(parent=self.shopping_cart_frame)
-        self.label_5.setGeometry(QtCore.QRect(20, 540, 51, 21))
-        self.label_5.setStyleSheet("color: white;\n"
-                                   "font-size: 15px")
-        self.label_5.setAlignment(
-            QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignTrailing | QtCore.Qt.AlignmentFlag.AlignVCenter)
-        self.label_5.setObjectName("label_5")
-        self.total_price_label = QtWidgets.QLabel(parent=self.shopping_cart_frame)
-        self.total_price_label.setGeometry(QtCore.QRect(90, 540, 101, 21))
-        self.total_price_label.setStyleSheet("color: white;\n"
-                                             "font-size: 15px")
-        self.total_price_label.setObjectName("total_price_label")
-        self.label_7 = QtWidgets.QLabel(parent=self.shopping_cart_frame)
-        self.label_7.setGeometry(QtCore.QRect(70, 540, 16, 21))
-        self.label_7.setStyleSheet("color: white;\n"
-                                   "font-size: 15px")
-        self.label_7.setAlignment(
-            QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignTrailing | QtCore.Qt.AlignmentFlag.AlignVCenter)
-        self.label_7.setObjectName("label_7")
-        self.main_stacked_widget.addWidget(self.home_page)
-        self.profile_page = QtWidgets.QWidget()
-        self.profile_page.setObjectName("profile_page")
-        self.label_2 = QtWidgets.QLabel(parent=self.profile_page)
-        self.label_2.setGeometry(QtCore.QRect(30, 200, 601, 301))
-        self.label_2.setStyleSheet("background-color: rgb(160, 160, 160);")
-        self.label_2.setText("")
-        self.label_2.setObjectName("label_2")
-        self.profile_picture_label = QtWidgets.QLabel(parent=self.profile_page)
-        self.profile_picture_label.setGeometry(QtCore.QRect(50, 30, 100, 100))
-        self.profile_picture_label.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
-        self.profile_picture_label.setStyleSheet("QLabel {\n"
-                                                 "    border-radius: 50%; /* Ensures the QLabel becomes circular */\n"
-                                                 "    background-color: #ffffff; /* Background color */\n"
-                                                 "    min-width: 100px; /* Adjust the size as needed */\n"
-                                                 "    min-height: 100px; /* Adjust the size as needed */\n"
-                                                 "    max-width: 100px; /* Keep width and height equal for a perfect circle */\n"
-                                                 "    max-height: 100px; /* Keep width and height equal for a perfect circle */\n"
-                                                 "    text-align: center; /* Center the text if there is any */\n"
-                                                 "}\n"
-                                                 "")
-        self.profile_picture_label.setText("")
-        self.profile_picture_label.setPixmap(QtGui.QPixmap(":/icons/accounticonpng.png"))
-        self.profile_picture_label.setScaledContents(True)
-        self.profile_picture_label.setObjectName("profile_picture_label")
-        self.profie_username_label = QtWidgets.QLabel(parent=self.profile_page)
-        self.profie_username_label.setGeometry(QtCore.QRect(160, 40, 261, 31))
-        self.profie_username_label.setStyleSheet("background-color: none;\n"
-                                                 "font: 25px \"CentSchbkCyrill BT\";\n"
-                                                 "text-decoration: underline;\n"
-                                                 "font-weight: bold")
-        self.profie_username_label.setWordWrap(True)
-        self.profie_username_label.setObjectName("profie_username_label")
-        self.profile_role_label = QtWidgets.QLabel(parent=self.profile_page)
-        self.profile_role_label.setGeometry(QtCore.QRect(160, 70, 81, 16))
-        self.profile_role_label.setStyleSheet("background-color: none;\n"
-                                              "font:  \"CentSchbkCyrill BT\";\n"
-                                              "text-decoration: none;\n"
-                                              "")
-        self.profile_role_label.setObjectName("profile_role_label")
-        self.frame_2 = QtWidgets.QFrame(parent=self.profile_page)
-        self.frame_2.setGeometry(QtCore.QRect(30, 20, 601, 121))
-        self.frame_2.setStyleSheet("background-color: rgb(160, 160, 160);")
-        self.frame_2.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.frame_2.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.frame_2.setObjectName("frame_2")
-        self.frame_3 = QtWidgets.QFrame(parent=self.frame_2)
-        self.frame_3.setGeometry(QtCore.QRect(400, 10, 2, 101))
-        self.frame_3.setStyleSheet("border: 2px solid")
-        self.frame_3.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.frame_3.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.frame_3.setObjectName("frame_3")
-        self.profie_username_label_3 = QtWidgets.QLabel(parent=self.frame_2)
-        self.profie_username_label_3.setGeometry(QtCore.QRect(130, 70, 16, 31))
-        self.profie_username_label_3.setStyleSheet("background-color: none;\n"
-                                                   "font: 25px \"CentSchbkCyrill BT\";\n"
-                                                   "font-weight: bold;\n"
-                                                   "\n"
-                                                   "")
-        self.profie_username_label_3.setObjectName("profie_username_label_3")
-        self.profile_uid_label = QtWidgets.QLabel(parent=self.frame_2)
-        self.profile_uid_label.setGeometry(QtCore.QRect(440, 100, 101, 16))
-        self.profile_uid_label.setStyleSheet("background-color: none;")
-        self.profile_uid_label.setObjectName("profile_uid_label")
-        self.label_12 = QtWidgets.QLabel(parent=self.frame_2)
-        self.label_12.setGeometry(QtCore.QRect(410, 80, 31, 16))
-        self.label_12.setStyleSheet("background-color: none;")
-        self.label_12.setObjectName("label_12")
-        self.profile_email_label = QtWidgets.QLabel(parent=self.frame_2)
-        self.profile_email_label.setGeometry(QtCore.QRect(440, 80, 161, 16))
-        self.profile_email_label.setStyleSheet("background-color: none;")
-        self.profile_email_label.setWordWrap(True)
-        self.profile_email_label.setObjectName("profile_email_label")
-        self.label_19 = QtWidgets.QLabel(parent=self.frame_2)
-        self.label_19.setGeometry(QtCore.QRect(410, 10, 121, 16))
-        self.label_19.setObjectName("label_19")
-        self.frame_10 = QtWidgets.QFrame(parent=self.frame_2)
-        self.frame_10.setGeometry(QtCore.QRect(410, 30, 171, 31))
-        self.frame_10.setStyleSheet("background-color: rgb(0, 255, 255);")
-        self.frame_10.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.frame_10.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.frame_10.setObjectName("frame_10")
-        self.most_recent_purchase_product_label = QtWidgets.QLabel(parent=self.frame_10)
-        self.most_recent_purchase_product_label.setGeometry(QtCore.QRect(10, 2, 47, 31))
-        self.most_recent_purchase_product_label.setStyleSheet("")
-        self.most_recent_purchase_product_label.setWordWrap(True)
-        self.most_recent_purchase_product_label.setObjectName("most_recent_purchase_product_label")
-        self.most_recent_purchase_price_label = QtWidgets.QLabel(parent=self.frame_10)
-        self.most_recent_purchase_price_label.setGeometry(QtCore.QRect(70, 2, 47, 31))
-        self.most_recent_purchase_price_label.setWordWrap(True)
-        self.most_recent_purchase_price_label.setObjectName("most_recent_purchase_price_label")
-        self.most_recent_purchase_quantity_label = QtWidgets.QLabel(parent=self.frame_10)
-        self.most_recent_purchase_quantity_label.setGeometry(QtCore.QRect(120, 2, 47, 31))
-        self.most_recent_purchase_quantity_label.setWordWrap(True)
-        self.most_recent_purchase_quantity_label.setObjectName("most_recent_purchase_quantity_label")
-        self.frame_12 = QtWidgets.QFrame(parent=self.frame_2)
-        self.frame_12.setGeometry(QtCore.QRect(490, 70, 111, 5))
-        self.frame_12.setStyleSheet("background-color: rgb(0, 255, 255);")
-        self.frame_12.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.frame_12.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.frame_12.setObjectName("frame_12")
-        self.label_8 = QtWidgets.QLabel(parent=self.profile_page)
-        self.label_8.setGeometry(QtCore.QRect(40, 170, 131, 16))
-        self.label_8.setObjectName("label_8")
-        self.profile_account_balance_label = QtWidgets.QLabel(parent=self.profile_page)
-        self.profile_account_balance_label.setGeometry(QtCore.QRect(180, 90, 241, 31))
-        self.profile_account_balance_label.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.ForbiddenCursor))
-        self.profile_account_balance_label.setStyleSheet("background-color: none;\n"
-                                                         "font: 25px \"CentSchbkCyrill BT\";\n"
-                                                         "font-weight: bold;\n"
-                                                         "\n"
-                                                         "")
-        self.profile_account_balance_label.setWordWrap(True)
-        self.profile_account_balance_label.setObjectName("profile_account_balance_label")
-        self.label_9 = QtWidgets.QLabel(parent=self.profile_page)
-        self.label_9.setGeometry(QtCore.QRect(440, 120, 21, 16))
-        self.label_9.setStyleSheet("background-color: none;")
-        self.label_9.setObjectName("label_9")
-        self.frame_4 = QtWidgets.QFrame(parent=self.profile_page)
-        self.frame_4.setGeometry(QtCore.QRect(40, 250, 180, 80))
-        self.frame_4.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.frame_4.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.frame_4.setObjectName("frame_4")
-        self.total_purchases_label = QtWidgets.QLabel(parent=self.frame_4)
-        self.total_purchases_label.setGeometry(QtCore.QRect(10, 0, 171, 51))
-        self.total_purchases_label.setStyleSheet("background-color: none;\n"
-                                                 "font: 50px \"CentSchbkCyrill BT\";\n"
-                                                 "font-weight: bold;\n"
-                                                 "\n"
-                                                 "")
-        self.total_purchases_label.setWordWrap(True)
-        self.total_purchases_label.setObjectName("total_purchases_label")
-        self.label_13 = QtWidgets.QLabel(parent=self.frame_4)
-        self.label_13.setGeometry(QtCore.QRect(10, 60, 81, 16))
-        self.label_13.setObjectName("label_13")
-        self.frame_5 = QtWidgets.QFrame(parent=self.profile_page)
-        self.frame_5.setGeometry(QtCore.QRect(240, 250, 180, 80))
-        self.frame_5.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.frame_5.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.frame_5.setObjectName("frame_5")
-        self.label_14 = QtWidgets.QLabel(parent=self.frame_5)
-        self.label_14.setGeometry(QtCore.QRect(10, 60, 161, 16))
-        self.label_14.setObjectName("label_14")
-        self.total_amount_spent_label = QtWidgets.QLabel(parent=self.frame_5)
-        self.total_amount_spent_label.setGeometry(QtCore.QRect(30, 0, 151, 51))
-        self.total_amount_spent_label.setStyleSheet("background-color: none;\n"
-                                                    "font: 30px \"CentSchbkCyrill BT\";\n"
-                                                    "font-weight: bold;\n"
-                                                    "\n"
-                                                    "")
-        self.total_amount_spent_label.setWordWrap(True)
-        self.total_amount_spent_label.setObjectName("total_amount_spent_label")
-        self.total_amount_spent_label_2 = QtWidgets.QLabel(parent=self.frame_5)
-        self.total_amount_spent_label_2.setGeometry(QtCore.QRect(10, 0, 31, 51))
-        self.total_amount_spent_label_2.setStyleSheet("background-color: none;\n"
-                                                      "font: 30px \"CentSchbkCyrill BT\";\n"
-                                                      "font-weight: bold;\n"
-                                                      "\n"
-                                                      "")
-        self.total_amount_spent_label_2.setWordWrap(True)
-        self.total_amount_spent_label_2.setObjectName("total_amount_spent_label_2")
-        self.frame_6 = QtWidgets.QFrame(parent=self.profile_page)
-        self.frame_6.setGeometry(QtCore.QRect(440, 250, 180, 80))
-        self.frame_6.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.frame_6.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.frame_6.setObjectName("frame_6")
-        self.total_items_bought_label = QtWidgets.QLabel(parent=self.frame_6)
-        self.total_items_bought_label.setGeometry(QtCore.QRect(10, 0, 171, 51))
-        self.total_items_bought_label.setStyleSheet("background-color: none;\n"
-                                                    "font: 50px \"CentSchbkCyrill BT\";\n"
-                                                    "font-weight: bold;\n"
-                                                    "\n"
-                                                    "")
-        self.total_items_bought_label.setWordWrap(True)
-        self.total_items_bought_label.setObjectName("total_items_bought_label")
-        self.label_15 = QtWidgets.QLabel(parent=self.frame_6)
-        self.label_15.setGeometry(QtCore.QRect(10, 60, 101, 16))
-        self.label_15.setObjectName("label_15")
-        self.frame_7 = QtWidgets.QFrame(parent=self.profile_page)
-        self.frame_7.setGeometry(QtCore.QRect(40, 380, 180, 80))
-        self.frame_7.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.frame_7.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.frame_7.setObjectName("frame_7")
-        self.most_visited_mall_label = QtWidgets.QLabel(parent=self.frame_7)
-        self.most_visited_mall_label.setGeometry(QtCore.QRect(10, 0, 171, 51))
-        self.most_visited_mall_label.setStyleSheet("background-color: none;\n"
-                                                   "font: 15px \"CentSchbkCyrill BT\";\n"
-                                                   "font-weight: bold;\n"
-                                                   "\n"
-                                                   "")
-        self.most_visited_mall_label.setWordWrap(True)
-        self.most_visited_mall_label.setObjectName("most_visited_mall_label")
-        self.label_17 = QtWidgets.QLabel(parent=self.frame_7)
-        self.label_17.setGeometry(QtCore.QRect(10, 60, 101, 16))
-        self.label_17.setObjectName("label_17")
-        self.frame_8 = QtWidgets.QFrame(parent=self.profile_page)
-        self.frame_8.setGeometry(QtCore.QRect(240, 380, 180, 80))
-        self.frame_8.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.frame_8.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.frame_8.setObjectName("frame_8")
-        self.most_bought_product_label = QtWidgets.QLabel(parent=self.frame_8)
-        self.most_bought_product_label.setGeometry(QtCore.QRect(10, 0, 151, 51))
-        self.most_bought_product_label.setStyleSheet("background-color: none;\n"
-                                                     "font: 15px \"CentSchbkCyrill BT\";\n"
-                                                     "font-weight: bold;\n"
-                                                     "\n"
-                                                     "")
-        self.most_bought_product_label.setWordWrap(True)
-        self.most_bought_product_label.setObjectName("most_bought_product_label")
-        self.label_16 = QtWidgets.QLabel(parent=self.frame_8)
-        self.label_16.setGeometry(QtCore.QRect(10, 60, 161, 16))
-        self.label_16.setObjectName("label_16")
-        self.frame_9 = QtWidgets.QFrame(parent=self.profile_page)
-        self.frame_9.setGeometry(QtCore.QRect(440, 380, 180, 80))
-        self.frame_9.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.frame_9.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.frame_9.setObjectName("frame_9")
-        self.most_actice_day_of_the_week_label = QtWidgets.QLabel(parent=self.frame_9)
-        self.most_actice_day_of_the_week_label.setGeometry(QtCore.QRect(10, 0, 151, 51))
-        self.most_actice_day_of_the_week_label.setStyleSheet("background-color: none;\n"
-                                                             "font: 15px \"CentSchbkCyrill BT\";\n"
-                                                             "font-weight: bold;\n"
-                                                             "\n"
-                                                             "")
-        self.most_actice_day_of_the_week_label.setWordWrap(True)
-        self.most_actice_day_of_the_week_label.setObjectName("most_actice_day_of_the_week_label")
-        self.label_18 = QtWidgets.QLabel(parent=self.frame_9)
-        self.label_18.setGeometry(QtCore.QRect(10, 60, 171, 16))
-        self.label_18.setWordWrap(True)
-        self.label_18.setObjectName("label_18")
-        self.frame_11 = QtWidgets.QFrame(parent=self.profile_page)
-        self.frame_11.setGeometry(QtCore.QRect(20, 220, 621, 5))
-        self.frame_11.setStyleSheet("background-color: rgb(0, 255, 255);")
-        self.frame_11.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.frame_11.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.frame_11.setObjectName("frame_11")
-        self.frame_2.raise_()
-        self.label_2.raise_()
-        self.profile_picture_label.raise_()
-        self.profie_username_label.raise_()
-        self.profile_role_label.raise_()
-        self.label_8.raise_()
-        self.profile_account_balance_label.raise_()
-        self.label_9.raise_()
-        self.frame_4.raise_()
-        self.frame_5.raise_()
-        self.frame_6.raise_()
-        self.frame_7.raise_()
-        self.frame_8.raise_()
-        self.frame_9.raise_()
-        self.frame_11.raise_()
-        self.main_stacked_widget.addWidget(self.profile_page)
-        self.settings_page = QtWidgets.QWidget()
-        self.settings_page.setObjectName("settings_page")
-        self.settingd_stacked_widget = QtWidgets.QStackedWidget(parent=self.settings_page)
-        self.settingd_stacked_widget.setGeometry(QtCore.QRect(10, 10, 651, 521))
-        self.settingd_stacked_widget.setObjectName("settingd_stacked_widget")
-        self.settings_home = QtWidgets.QWidget()
-        self.settings_home.setObjectName("settings_home")
-        self.label_20 = QtWidgets.QLabel(parent=self.settings_home)
-        self.label_20.setGeometry(QtCore.QRect(100, 20, 60, 60))
-        self.label_20.setStyleSheet("background-color: rgb(130, 135, 144);\n"
-                                    "border-radius: 20px;\n"
-                                    "")
-        self.label_20.setText("")
-        self.label_20.setPixmap(QtGui.QPixmap(":/icons/accounticonpng.png"))
-        self.label_20.setScaledContents(True)
-        self.label_20.setAlignment(
-            QtCore.Qt.AlignmentFlag.AlignLeading | QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
-        self.label_20.setObjectName("label_20")
-        self.label_22 = QtWidgets.QLabel(parent=self.settings_home)
-        self.label_22.setGeometry(QtCore.QRect(510, 20, 60, 60))
-        font = QtGui.QFont()
-        font.setPointSize(-1)
-        self.label_22.setFont(font)
-        self.label_22.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
-        self.label_22.setStyleSheet("background-color: rgb(130, 135, 144);\n"
-                                    "border-radius: 20px;\n"
-                                    "font-size: 20px")
-        self.label_22.setScaledContents(True)
-        self.label_22.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.label_22.setObjectName("label_22")
-        self.label_24 = QtWidgets.QLabel(parent=self.settings_home)
-        self.label_24.setGeometry(QtCore.QRect(510, 110, 60, 60))
-        font = QtGui.QFont()
-        font.setPointSize(-1)
-        self.label_24.setFont(font)
-        self.label_24.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
-        self.label_24.setStyleSheet("background-color: rgb(130, 135, 144);\n"
-                                    "border-radius: 20px;\n"
-                                    "font-size: 20px")
-        self.label_24.setScaledContents(True)
-        self.label_24.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.label_24.setObjectName("label_24")
-        self.label_25 = QtWidgets.QLabel(parent=self.settings_home)
-        self.label_25.setGeometry(QtCore.QRect(100, 110, 60, 60))
-        self.label_25.setStyleSheet("background-color: rgb(130, 135, 144);\n"
-                                    "border-radius: 20px;\n"
-                                    "")
-        self.label_25.setText("")
-        self.label_25.setPixmap(QtGui.QPixmap(":/icons/Downloads/shopping-cart.png"))
-        self.label_25.setScaledContents(True)
-        self.label_25.setAlignment(
-            QtCore.Qt.AlignmentFlag.AlignLeading | QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
-        self.label_25.setObjectName("label_25")
-        self.label_26 = QtWidgets.QLabel(parent=self.settings_home)
-        self.label_26.setGeometry(QtCore.QRect(100, 200, 60, 60))
-        self.label_26.setStyleSheet("background-color: rgb(130, 135, 144);\n"
-                                    "border-radius: 20px;\n"
-                                    "")
-        self.label_26.setText("")
-        self.label_26.setPixmap(QtGui.QPixmap(":/icons/accounticonpng.png"))
-        self.label_26.setScaledContents(True)
-        self.label_26.setAlignment(
-            QtCore.Qt.AlignmentFlag.AlignLeading | QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
-        self.label_26.setObjectName("label_26")
-        self.label_27 = QtWidgets.QLabel(parent=self.settings_home)
-        self.label_27.setGeometry(QtCore.QRect(100, 450, 60, 60))
-        self.label_27.setStyleSheet("background-color: rgb(130, 135, 144);\n"
-                                    "border-radius: 20px;\n"
-                                    "")
-        self.label_27.setText("")
-        self.label_27.setPixmap(QtGui.QPixmap(":/icons/accounticonpng.png"))
-        self.label_27.setScaledContents(True)
-        self.label_27.setAlignment(
-            QtCore.Qt.AlignmentFlag.AlignLeading | QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
-        self.label_27.setObjectName("label_27")
-        self.label_30 = QtWidgets.QLabel(parent=self.settings_home)
-        self.label_30.setGeometry(QtCore.QRect(500, 200, 60, 60))
-        font = QtGui.QFont()
-        font.setPointSize(-1)
-        self.label_30.setFont(font)
-        self.label_30.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
-        self.label_30.setStyleSheet("background-color: rgb(130, 135, 144);\n"
-                                    "border-radius: 20px;\n"
-                                    "font-size: 20px")
-        self.label_30.setScaledContents(True)
-        self.label_30.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.label_30.setObjectName("label_30")
-        self.label_31 = QtWidgets.QLabel(parent=self.settings_home)
-        self.label_31.setGeometry(QtCore.QRect(520, 450, 20, 60))
-        font = QtGui.QFont()
-        font.setPointSize(-1)
-        self.label_31.setFont(font)
-        self.label_31.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
-        self.label_31.setStyleSheet("background-color: rgb(130, 135, 144);\n"
-                                    "border-radius: 20px;\n"
-                                    "font-size: 20px")
-        self.label_31.setScaledContents(True)
-        self.label_31.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.label_31.setObjectName("label_31")
-        self.profile_settingsbutton = QtWidgets.QPushButton(parent=self.settings_home)
-        self.profile_settingsbutton.setGeometry(QtCore.QRect(70, 20, 520, 60))
-        self.profile_settingsbutton.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
-        self.profile_settingsbutton.setStyleSheet("background-color: rgb(130, 135, 144);\n"
-                                                  "border-radius: 20px;\n"
-                                                  "font-size: 20px")
-        self.profile_settingsbutton.setObjectName("profile_settingsbutton")
-        self.bank_settingsbutton = QtWidgets.QPushButton(parent=self.settings_home)
-        self.bank_settingsbutton.setGeometry(QtCore.QRect(70, 110, 520, 60))
-        self.bank_settingsbutton.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
-        self.bank_settingsbutton.setStyleSheet("background-color: rgb(130, 135, 144);\n"
-                                               "border-radius: 20px;\n"
-                                               "font-size: 20px")
-        self.bank_settingsbutton.setObjectName("bank_settingsbutton")
-        self.tandc_settingsbutton = QtWidgets.QPushButton(parent=self.settings_home)
-        self.tandc_settingsbutton.setGeometry(QtCore.QRect(70, 200, 520, 60))
-        self.tandc_settingsbutton.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
-        self.tandc_settingsbutton.setStyleSheet("background-color: rgb(130, 135, 144);\n"
-                                                "border-radius: 20px;\n"
-                                                "font-size: 20px")
-        self.tandc_settingsbutton.setObjectName("tandc_settingsbutton")
-        self.logout_settingsbutton = QtWidgets.QPushButton(parent=self.settings_home)
-        self.logout_settingsbutton.setGeometry(QtCore.QRect(70, 450, 520, 60))
-        self.logout_settingsbutton.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
-        self.logout_settingsbutton.setStyleSheet("background-color: rgb(130, 135, 144);\n"
-                                                 "border-radius: 20px;\n"
-                                                 "font-size: 20px")
-        self.logout_settingsbutton.setObjectName("logout_settingsbutton")
-        self.logout_settingsbutton.raise_()
-        self.tandc_settingsbutton.raise_()
-        self.bank_settingsbutton.raise_()
-        self.profile_settingsbutton.raise_()
-        self.label_20.raise_()
-        self.label_22.raise_()
-        self.label_24.raise_()
-        self.label_25.raise_()
-        self.label_26.raise_()
-        self.label_27.raise_()
-        self.label_30.raise_()
-        self.label_31.raise_()
-        self.settingd_stacked_widget.addWidget(self.settings_home)
-        self.setings_profile_page = QtWidgets.QWidget()
-        self.setings_profile_page.setObjectName("setings_profile_page")
-        self.frame_13 = QtWidgets.QFrame(parent=self.setings_profile_page)
-        self.frame_13.setGeometry(QtCore.QRect(50, 40, 551, 431))
-        self.frame_13.setStyleSheet("border-bottom: 5px solid;\n"
-                                    "border-right: 5px solid;\n"
-                                    "border-color: rgb(192, 198, 200);")
-        self.frame_13.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.frame_13.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.frame_13.setObjectName("frame_13")
-        self.profile_picture_label_2 = QtWidgets.QLabel(parent=self.frame_13)
-        self.profile_picture_label_2.setGeometry(QtCore.QRect(90, 20, 100, 100))
-        self.profile_picture_label_2.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
-        self.profile_picture_label_2.setStyleSheet("QLabel {\n"
-                                                   "    border-radius: 50%; /* Ensures the QLabel becomes circular */\n"
-                                                   "    background-color: #ffffff; /* Background color */\n"
-                                                   "    min-width: 100px; /* Adjust the size as needed */\n"
-                                                   "    min-height: 100px; /* Adjust the size as needed */\n"
-                                                   "    max-width: 100px; /* Keep width and height equal for a perfect circle */\n"
-                                                   "    max-height: 100px; /* Keep width and height equal for a perfect circle */\n"
-                                                   "    text-align: center; /* Center the text if there is any */\n"
-                                                   "    border: none\n"
-                                                   "\n"
-                                                   "}\n"
-                                                   "\n"
-                                                   "")
-        self.profile_picture_label_2.setText("")
-        self.profile_picture_label_2.setPixmap(QtGui.QPixmap("./images/accounticonpng.png"))
-        self.profile_picture_label_2.setScaledContents(True)
-        self.profile_picture_label_2.setObjectName("profile_picture_label_2")
-        self.upload_new_picture_button = QtWidgets.QPushButton(parent=self.frame_13)
-        self.upload_new_picture_button.setGeometry(QtCore.QRect(210, 70, 111, 23))
-        self.upload_new_picture_button.setStyleSheet("\n"
-                                                     "QPushButton {\n"
-                                                     "                \n"
-                                                     "    background-color: blue;\n"
-                                                     "                border: none;\n"
-                                                     "                border-radius: 5px;\n"
-                                                     "\n"
-                                                     "                color: white\n"
-                                                     "            }\n"
-                                                     "QPushButton:hover {\n"
-                                                     "                background-color: gray;\n"
-                                                     "            };\n"
-                                                     "")
-        self.upload_new_picture_button.setObjectName("upload_new_picture_button")
-        self.delete_picture_button = QtWidgets.QPushButton(parent=self.frame_13)
-        self.delete_picture_button.setGeometry(QtCore.QRect(350, 70, 101, 23))
-        self.delete_picture_button.setStyleSheet("\n"
-                                                 "QPushButton {\n"
-                                                 "                \n"
-                                                 "    background-color: blue;\n"
-                                                 "                border: none;\n"
-                                                 "                border-radius: 5px;\n"
-                                                 "\n"
-                                                 "                color: white\n"
-                                                 "            }\n"
-                                                 "QPushButton:hover {\n"
-                                                 "                background-color: gray;\n"
-                                                 "            };\n"
-                                                 "")
-        self.delete_picture_button.setObjectName("delete_picture_button")
-        self.profilesetting_username_line_edit = QtWidgets.QLineEdit(parent=self.frame_13)
-        self.profilesetting_username_line_edit.setGeometry(QtCore.QRect(60, 160, 431, 31))
-        self.profilesetting_username_line_edit.setObjectName("profilesetting_username_line_edit")
-        self.label_32 = QtWidgets.QLabel(parent=self.frame_13)
-        self.label_32.setGeometry(QtCore.QRect(60, 140, 101, 20))
-        self.label_32.setStyleSheet("font-size: 20px;\n"
-                                    "border: none\n"
-                                    "")
-        self.label_32.setObjectName("label_32")
-        self.save_changes_button = QtWidgets.QPushButton(parent=self.frame_13)
-        self.save_changes_button.setGeometry(QtCore.QRect(70, 390, 111, 23))
-        self.save_changes_button.setStyleSheet("\n"
-                                               "QPushButton {\n"
-                                               "                \n"
-                                               "    background-color: blue;\n"
-                                               "                border: none;\n"
-                                               "                border-radius: 5px;\n"
-                                               "\n"
-                                               "                color: white\n"
-                                               "            }\n"
-                                               "QPushButton:hover {\n"
-                                               "                background-color: gray;\n"
-                                               "            };\n"
-                                               "")
-        self.save_changes_button.setObjectName("save_changes_button")
-        self.label_33 = QtWidgets.QLabel(parent=self.frame_13)
-        self.label_33.setGeometry(QtCore.QRect(60, 220, 101, 20))
-        self.label_33.setStyleSheet("font-size: 20px;\n"
-                                    "border: none\n"
-                                    "")
-        self.label_33.setObjectName("label_33")
-        self.profilesettings_email_line_edit = QtWidgets.QLineEdit(parent=self.frame_13)
-        self.profilesettings_email_line_edit.setGeometry(QtCore.QRect(60, 240, 431, 31))
-        self.profilesettings_email_line_edit.setObjectName("profilesettings_email_line_edit")
-        self.back_to_settings_page_button = QtWidgets.QPushButton(parent=self.setings_profile_page)
-        self.back_to_settings_page_button.setGeometry(QtCore.QRect(20, 495, 75, 23))
-        self.back_to_settings_page_button.setStyleSheet("\n"
-                                                        "QPushButton {\n"
-                                                        "                \n"
-                                                        "    background-color: blue;\n"
-                                                        "                border: none;\n"
-                                                        "                border-radius: 5px;\n"
-                                                        "\n"
-                                                        "                color: white\n"
-                                                        "            }\n"
-                                                        "QPushButton:hover {\n"
-                                                        "                background-color: gray;\n"
-                                                        "            };\n"
-                                                        "")
-        self.back_to_settings_page_button.setObjectName("back_to_settings_page_button")
-        self.settingd_stacked_widget.addWidget(self.setings_profile_page)
-        self.settings_bank_page = QtWidgets.QWidget()
-        self.settings_bank_page.setObjectName("settings_bank_page")
-        self.frame_14 = QtWidgets.QFrame(parent=self.settings_bank_page)
-        self.frame_14.setGeometry(QtCore.QRect(50, 40, 551, 431))
-        self.frame_14.setStyleSheet("border-bottom: 5px solid;\n"
-                                    "border-right: 5px solid;\n"
-                                    "border-color: rgb(192, 198, 200);")
-        self.frame_14.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.frame_14.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.frame_14.setObjectName("frame_14")
-        self.save_bank_info_button = QtWidgets.QPushButton(parent=self.frame_14)
-        self.save_bank_info_button.setGeometry(QtCore.QRect(70, 190, 111, 23))
-        self.save_bank_info_button.setStyleSheet("\n"
-                                                 "QPushButton {\n"
-                                                 "                \n"
-                                                 "    background-color: blue;\n"
-                                                 "                border: none;\n"
-                                                 "                border-radius: 5px;\n"
-                                                 "\n"
-                                                 "                color: white\n"
-                                                 "            }\n"
-                                                 "QPushButton:hover {\n"
-                                                 "                background-color: gray;\n"
-                                                 "            };\n"
-                                                 "")
-        self.save_bank_info_button.setObjectName("save_bank_info_button")
-        self.card_number_edit = QtWidgets.QLineEdit(parent=self.frame_14)
-        self.card_number_edit.setGeometry(QtCore.QRect(70, 140, 151, 20))
-        self.card_number_edit.setObjectName("card_number_edit")
-        self.deposit_money_button = QtWidgets.QPushButton(parent=self.frame_14)
-        self.deposit_money_button.setGeometry(QtCore.QRect(70, 390, 111, 23))
-        self.deposit_money_button.setStyleSheet("\n"
-                                                "QPushButton {\n"
-                                                "                \n"
-                                                "    background-color: blue;\n"
-                                                "                border: none;\n"
-                                                "                border-radius: 5px;\n"
-                                                "\n"
-                                                "                color: white\n"
-                                                "            }\n"
-                                                "QPushButton:hover {\n"
-                                                "                background-color: gray;\n"
-                                                "            };\n"
-                                                "")
-        self.deposit_money_button.setObjectName("deposit_money_button")
-        self.label_35 = QtWidgets.QLabel(parent=self.frame_14)
-        self.label_35.setGeometry(QtCore.QRect(60, 270, 141, 31))
-        self.label_35.setStyleSheet("font-size: 20px;\n"
-                                    "border: none\n"
-                                    "")
-        self.label_35.setObjectName("label_35")
-        self.deposit_money_line_edit = QtWidgets.QLineEdit(parent=self.frame_14)
-        self.deposit_money_line_edit.setGeometry(QtCore.QRect(70, 340, 431, 31))
-        self.deposit_money_line_edit.setObjectName("deposit_money_line_edit")
-        self.frame_15 = QtWidgets.QFrame(parent=self.frame_14)
-        self.frame_15.setGeometry(QtCore.QRect(70, 240, 500, 5))
-        self.frame_15.setStyleSheet("background-color: rgb(0, 255, 255);")
-        self.frame_15.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.frame_15.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.frame_15.setObjectName("frame_15")
-        self.label_36 = QtWidgets.QLabel(parent=self.frame_14)
-        self.label_36.setGeometry(QtCore.QRect(70, 320, 101, 16))
-        self.label_36.setStyleSheet("border: none\n"
-                                    "")
-        self.label_36.setObjectName("label_36")
-        self.label_37 = QtWidgets.QLabel(parent=self.frame_14)
-        self.label_37.setGeometry(QtCore.QRect(60, 30, 171, 31))
-        self.label_37.setStyleSheet("font-size: 20px;\n"
-                                    "border: none\n"
-                                    "")
-        self.label_37.setObjectName("label_37")
-        self.payment_method_combo_box = QtWidgets.QComboBox(parent=self.frame_14)
-        self.payment_method_combo_box.setGeometry(QtCore.QRect(70, 80, 121, 22))
-        self.payment_method_combo_box.setStyleSheet("border: none;\n"
-                                                    "background-color: white")
-        self.payment_method_combo_box.setObjectName("payment_method_combo_box")
-        self.payment_method_combo_box.addItem("")
-        self.payment_method_combo_box.addItem("")
-        self.payment_method_combo_box.addItem("")
-        self.payment_method_combo_box.addItem("")
-        self.label_38 = QtWidgets.QLabel(parent=self.frame_14)
-        self.label_38.setGeometry(QtCore.QRect(70, 60, 101, 16))
-        self.label_38.setStyleSheet("border: none\n"
-                                    "")
-        self.label_38.setObjectName("label_38")
-        self.label_34 = QtWidgets.QLabel(parent=self.frame_14)
-        self.label_34.setGeometry(QtCore.QRect(70, 120, 71, 16))
-        self.label_34.setStyleSheet("border: none\n"
-                                    "")
-        self.label_34.setObjectName("label_34")
-        self.back_to_settings_page_button_2 = QtWidgets.QPushButton(parent=self.settings_bank_page)
-        self.back_to_settings_page_button_2.setGeometry(QtCore.QRect(20, 495, 75, 23))
-        self.back_to_settings_page_button_2.setStyleSheet("\n"
-                                                          "QPushButton {\n"
-                                                          "                \n"
-                                                          "    background-color: blue;\n"
-                                                          "                border: none;\n"
-                                                          "                border-radius: 5px;\n"
-                                                          "\n"
-                                                          "                color: white\n"
-                                                          "            }\n"
-                                                          "QPushButton:hover {\n"
-                                                          "                background-color: gray;\n"
-                                                          "            };\n"
-                                                          "")
-        self.back_to_settings_page_button_2.setObjectName("back_to_settings_page_button_2")
-        self.settingd_stacked_widget.addWidget(self.settings_bank_page)
-        self.settings_tandc_page = QtWidgets.QWidget()
-        self.settings_tandc_page.setObjectName("settings_tandc_page")
-        self.scrollArea_2 = QtWidgets.QScrollArea(parent=self.settings_tandc_page)
-        self.scrollArea_2.setGeometry(QtCore.QRect(0, 0, 651, 491))
-        self.scrollArea_2.setWidgetResizable(True)
-        self.scrollArea_2.setObjectName("scrollArea_2")
-        self.scrollAreaWidgetContents_2 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 632, 1218))
-        self.scrollAreaWidgetContents_2.setObjectName("scrollAreaWidgetContents_2")
-        self.verticalLayout_6 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents_2)
-        self.verticalLayout_6.setObjectName("verticalLayout_6")
-        self.grid_frame_4 = QtWidgets.QFrame(parent=self.scrollAreaWidgetContents_2)
-        self.grid_frame_4.setMinimumSize(QtCore.QSize(0, 1200))
-        self.grid_frame_4.setStyleSheet("background-color: rgb(85, 85, 0);")
-        self.grid_frame_4.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.grid_frame_4.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.grid_frame_4.setObjectName("grid_frame_4")
-        self.label_39 = QtWidgets.QLabel(parent=self.grid_frame_4)
-        self.label_39.setGeometry(QtCore.QRect(10, -20, 609, 1279))
-        self.label_39.setScaledContents(True)
-        self.label_39.setWordWrap(True)
-        self.label_39.setObjectName("label_39")
-        self.verticalLayout_6.addWidget(self.grid_frame_4)
-        self.scrollArea_2.setWidget(self.scrollAreaWidgetContents_2)
-        self.back_to_settings_page_button_3 = QtWidgets.QPushButton(parent=self.settings_tandc_page)
-        self.back_to_settings_page_button_3.setGeometry(QtCore.QRect(20, 495, 75, 23))
-        self.back_to_settings_page_button_3.setStyleSheet("\n"
-                                                          "QPushButton {\n"
-                                                          "                \n"
-                                                          "    background-color: blue;\n"
-                                                          "                border: none;\n"
-                                                          "                border-radius: 5px;\n"
-                                                          "\n"
-                                                          "                color: white\n"
-                                                          "            }\n"
-                                                          "QPushButton:hover {\n"
-                                                          "                background-color: gray;\n"
-                                                          "            };\n"
-                                                          "")
-        self.back_to_settings_page_button_3.setObjectName("back_to_settings_page_button_3")
-        self.settingd_stacked_widget.addWidget(self.settings_tandc_page)
-        self.main_stacked_widget.addWidget(self.settings_page)
-        self.header_frame = QtWidgets.QFrame(parent=self.centralwidget)
-        self.header_frame.setGeometry(QtCore.QRect(0, 0, 801, 51))
-        self.header_frame.setStyleSheet("background-color: rgb(16, 16, 16);")
-        self.header_frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.header_frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.header_frame.setObjectName("header_frame")
-        self.hamburger_menu_button = QtWidgets.QPushButton(parent=self.header_frame)
-        self.hamburger_menu_button.setGeometry(QtCore.QRect(30, 10, 61, 41))
-        self.hamburger_menu_button.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
-        self.hamburger_menu_button.setStyleSheet("\n"
-                                                 "QPushButton {\n"
-                                                 "                \n"
-                                                 "    background-color: rgb(16, 16, 16);\n"
-                                                 "                border: none;\n"
-                                                 "                border-radius: 5px;\n"
-                                                 "                color: white\n"
-                                                 "            }\n"
-                                                 "QPushButton:hover {\n"
-                                                 "                background-color: blue;\n"
-                                                 "            }\n"
-                                                 "")
-        self.hamburger_menu_button.setText("")
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/icons/Downloads/material-symbols--menu-rounded.png"), QtGui.QIcon.Mode.Normal,
-                        QtGui.QIcon.State.Off)
-        self.hamburger_menu_button.setIcon(icon1)
-        self.hamburger_menu_button.setIconSize(QtCore.QSize(50, 50))
-        self.hamburger_menu_button.setObjectName("hamburger_menu_button")
-        self.shopping_cart_button = QtWidgets.QPushButton(parent=self.header_frame)
-        self.shopping_cart_button.setGeometry(QtCore.QRect(714, 10, 41, 31))
-        self.shopping_cart_button.setStyleSheet("QPushButton {\n"
-                                                "                \n"
-                                                "    background-color:  rgb(16, 16, 16);\n"
-                                                "                border: none;\n"
-                                                "                border-radius: 5px;\n"
-                                                "\n"
-                                                "                color: white\n"
-                                                "            }\n"
-                                                "QPushButton:hover {\n"
-                                                "                background-color: blue;\n"
-                                                "            };\n"
-                                                "")
-        self.shopping_cart_button.setText("")
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/icons/Downloads/shopping-cart.png"), QtGui.QIcon.Mode.Normal,
-                        QtGui.QIcon.State.Off)
-        self.shopping_cart_button.setIcon(icon2)
-        self.shopping_cart_button.setIconSize(QtCore.QSize(30, 30))
-        self.shopping_cart_button.setObjectName("shopping_cart_button")
-        self.account_balance_label = QtWidgets.QLabel(parent=self.header_frame)
-        self.account_balance_label.setGeometry(QtCore.QRect(620, 10, 91, 31))
-        self.account_balance_label.setStyleSheet("color: white;\n"
-                                                 "font-weight: bold;\n"
-                                                 "text-align: center;\n"
-                                                 "font-size: 15px;\n"
-                                                 "")
-        self.account_balance_label.setObjectName("account_balance_label")
-        self.label_4 = QtWidgets.QLabel(parent=self.header_frame)
-        self.label_4.setGeometry(QtCore.QRect(600, 10, 16, 31))
-        self.label_4.setStyleSheet("color: white;\n"
-                                   "font-weight: bold;\n"
-                                   "text-align: center;\n"
-                                   "font-size: 15px;")
-        self.label_4.setAlignment(
-            QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignTrailing | QtCore.Qt.AlignmentFlag.AlignVCenter)
-        self.label_4.setObjectName("label_4")
-        self.welcome_username_label = QtWidgets.QLabel(parent=self.header_frame)
-        self.welcome_username_label.setGeometry(QtCore.QRect(140, 10, 301, 31))
-        self.welcome_username_label.setStyleSheet("color: white;\n"
-                                                  "font-weight: bold;\n"
-                                                  "text-align: center;\n"
-                                                  "font-size: 15px;\n"
-                                                  "")
-        self.welcome_username_label.setObjectName("welcome_username_label")
-        self.notification_label = QtWidgets.QLabel(parent=self.header_frame)
-        self.notification_label.setEnabled(True)
-        self.notification_label.setGeometry(QtCore.QRect(737, 7, 16, 16))
-        self.notification_label.setStyleSheet("QLabel {\n"
-                                              "    border: 1px solid #ff0000; /* Red border */\n"
-                                              "    border-radius: 5px; /* Ensures the QLabel becomes circular */\n"
-                                              "    background-color: #ff0000; /* Red background color */\n"
-                                              "    width: 10px; /* Small width */\n"
-                                              "    height: 10px; /* Small height */\n"
-                                              "    padding: 0px; /* Remove any default padding */\n"
-                                              "      visibility: hidden;\n"
-                                              "color: white\n"
-                                              "}\n"
-                                              "")
-        self.notification_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.notification_label.setObjectName("notification_label")
-        self.menu_frame = QtWidgets.QFrame(parent=self.centralwidget)
-        self.menu_frame.setGeometry(QtCore.QRect(0, 50, 131, 531))
-        self.menu_frame.setStyleSheet("background-color: rgb(16, 16, 16);")
-        self.menu_frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.menu_frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.menu_frame.setObjectName("menu_frame")
-        self.profile_button = QtWidgets.QPushButton(parent=self.menu_frame)
-        self.profile_button.setGeometry(QtCore.QRect(10, 130, 111, 51))
-        self.profile_button.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
-        self.profile_button.setStyleSheet("\n"
-                                          "QPushButton {\n"
-                                          "                \n"
-                                          "    background-color: rgb(16, 16, 16);\n"
-                                          "                border: none;\n"
-                                          "                border-radius: 5px;\n"
-                                          "                padding-left:20px;\n"
-                                          "                color: white\n"
-                                          "            }\n"
-                                          "QPushButton:hover {\n"
-                                          "                background-color: blue;\n"
-                                          "            }\n"
-                                          "")
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap(":/icons/Downloads/account-circle.png"), QtGui.QIcon.Mode.Normal,
-                        QtGui.QIcon.State.Off)
-        self.profile_button.setIcon(icon3)
-        self.profile_button.setIconSize(QtCore.QSize(40, 40))
-        self.profile_button.setObjectName("profile_button")
-        self.settings_button = QtWidgets.QPushButton(parent=self.menu_frame)
-        self.settings_button.setGeometry(QtCore.QRect(10, 450, 111, 51))
-        self.settings_button.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
-        self.settings_button.setStyleSheet("\n"
-                                           "QPushButton {\n"
-                                           "                \n"
-                                           "    background-color: rgb(16, 16, 16);\n"
-                                           "                border: none;\n"
-                                           "                border-radius: 5px;\n"
-                                           "                padding-left:20px;\n"
-                                           "                color: white\n"
-                                           "            }\n"
-                                           "QPushButton:hover {\n"
-                                           "                background-color: blue;\n"
-                                           "            }\n"
-                                           "")
-        icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap(":/icons/Downloads/settingsicon1.png"), QtGui.QIcon.Mode.Normal,
-                        QtGui.QIcon.State.Off)
-        self.settings_button.setIcon(icon4)
-        self.settings_button.setIconSize(QtCore.QSize(40, 40))
-        self.settings_button.setObjectName("settings_button")
-        self.home_button = QtWidgets.QPushButton(parent=self.menu_frame)
-        self.home_button.setGeometry(QtCore.QRect(10, 30, 111, 51))
-        self.home_button.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
-        self.home_button.setAutoFillBackground(False)
-        self.home_button.setStyleSheet("\n"
-                                       "QPushButton {\n"
-                                       "                icon-position: left;\n"
-                                       "    background-color: rgb(16, 16, 16);\n"
-                                       "                border: none;\n"
-                                       "                border-radius: 5px;\n"
-                                       "                padding-left:20px;\n"
-                                       "                color: white\n"
-                                       "            }\n"
-                                       "QPushButton:hover {\n"
-                                       "                background-color: blue;\n"
-                                       "            }\n"
-                                       "")
-        icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap(":/icons/Downloads/home-rounded.png"), QtGui.QIcon.Mode.Normal,
-                        QtGui.QIcon.State.Off)
-        self.home_button.setIcon(icon5)
-        self.home_button.setIconSize(QtCore.QSize(40, 40))
-        self.home_button.setCheckable(False)
-        self.home_button.setObjectName("home_button")
-        self.footer_frame = QtWidgets.QFrame(parent=self.centralwidget)
-        self.footer_frame.setGeometry(QtCore.QRect(0, 580, 801, 21))
-        self.footer_frame.setStyleSheet("background-color: rgb(16, 16, 16);")
-        self.footer_frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.footer_frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.footer_frame.setObjectName("footer_frame")
-        MainWindow.setCentralWidget(self.centralwidget)
+class MainApp2(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        uic.loadUi('main_app_ui.ui', self)
+        self.connect_all()
 
-        self.retranslateUi(MainWindow)
+    def connect_all(self):
         self.main_stacked_widget.setCurrentIndex(0)
         self.home_page_widget.setCurrentIndex(0)
         self.settingd_stacked_widget.setCurrentIndex(0)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
         self.home_button.clicked.connect(self.go_to_home_page)
         self.profile_button.clicked.connect(self.go_to_profile_page)
         self.buy_product_button.clicked.connect(self.buy_products)
@@ -1295,8 +81,6 @@ class MainAppUI(object):
         self.logout_settingsbutton.clicked.connect(self.log_out)
         self.hamburger_menu_button.clicked.connect(self.slide_left_menu)
         self.shopping_cart_button.clicked.connect(self.show_shopping_cart_menu)
-        self.create_store_submit_button_2.clicked.connect(self.go_to_create_store_page)
-        self.create_store_submit_button.clicked.connect(self.handle_create_mall)
         self.back_to_malls_page_button.clicked.connect(self.go_to_malls_page)
         self.back_to_products_page_button.clicked.connect(self.go_to_products_page)
         self.menu_expanded = True
@@ -1308,6 +92,37 @@ class MainAppUI(object):
         self.quantity_edit.setText('1')
         # Call method to populate grid layout
         self.populate_grid_layout()
+
+    def show_notification_message(self, message):
+        # Set the initial geometry and text for the notification label
+        self.main_app_notif_label.setGeometry(QtCore.QRect(230, -30, 360, 30))
+        self.main_app_notif_label.setText(message)
+        self.main_app_notif_label.show()
+
+        # Create and configure the animation for moving the label down
+        self.animation_down = QPropertyAnimation(self.main_app_notif_label, b"geometry")
+        self.animation_down.setDuration(500)  # Duration for moving down
+        self.animation_down.setStartValue(QtCore.QRect(230, -30, 360, 30))
+        self.animation_down.setEndValue(QtCore.QRect(230, 10, 360, 30))
+
+        # Create and configure the animation for moving the label up
+        self.animation_up = QPropertyAnimation(self.main_app_notif_label, b"geometry")
+        self.animation_up.setDuration(500)  # Duration for moving up
+        self.animation_up.setStartValue(QtCore.QRect(230, 10, 360, 30))
+        self.animation_up.setEndValue(QtCore.QRect(230, -30, 360, 30))
+
+        # Set up a QTimer to start the "move up" animation after 3 seconds
+        self.timer = QTimer()
+        self.timer.setSingleShot(True)
+        self.timer.timeout.connect(self.start_animation_up)
+        self.timer.start(3000)  # Wait for 3 seconds
+
+        # Start the "move down" animation
+        self.animation_down.start()
+
+    def start_animation_up(self):
+        # Start the "move up" animation
+        self.animation_up.start()
 
     def slide_left_menu(self):
         width = self.menu_frame.width()
@@ -1420,6 +235,7 @@ class MainAppUI(object):
         user_id = config.user_id
 
         update_account_info(username, email, user_id)
+        self.show_notification_message('Account info updated')
 
     def save_bank_info_changes(self):
         payment_method = self.payment_method_combo_box.currentText()
@@ -1427,22 +243,28 @@ class MainAppUI(object):
         card_number = self.card_number_edit.text()
 
         if not card_number.isdigit():
+            self.show_notification_message('new card number is not numbers')
             print('new card number is not numbers')
             return
 
         if not len(card_number) == 10:
+            self.show_notification_message('incomplete card number')
             print('incomplete card number')
 
         config.card_number = card_number
+        self.show_notification_message('Bank info updated')
+        print('Bank info updated')
 
     def deposit_money(self):
         amount = self.deposit_money_line_edit.text()
 
         if not amount.isdigit():
+            self.show_notification_message('incorrect input')
             print('incorrect input')
             return
 
         if len(amount) > 8:
+            self.show_notification_message('invalid amount')
             print('invalid amount')
             return
 
@@ -1451,6 +273,7 @@ class MainAppUI(object):
         config.account_balance = new_balance
         self.account_balance_label.setText(str(new_balance))
         self.deposit_money_line_edit.setText('')
+        self.show_notification_message('account balance updated!!!')
         print('account balance updated!!!')
 
     def go_to_bank_settings(self):
@@ -1462,18 +285,27 @@ class MainAppUI(object):
         self.settingd_stacked_widget.setCurrentIndex(3)
 
     def log_out(self):
-        # Close the current main application window
-        from e_mall_mainwin import MainWindow
-        self.login_window = QtWidgets.QMainWindow()
-        self.login_ui = MainWindow(self.login_window)
-        self.login_ui.setupUi(self.login_window)
+        # Hide the current main window
+        self.hide()
+        print('Main window hidden')
+
+        # Show the login app
+        self.show_login_app()
+
+    def show_login_app(self):
+        print('Showing login app')
+
+        # Ensure the login window is not created multiple times
+        if hasattr(self, 'login_window') and self.login_window.isVisible():
+            return  # Login window already open
+
+        # Initialize and show the login window
+        self.login_window = MainApp()  # Replace with your actual login window class
         self.login_window.show()
+        MainApp.show_notification_message(self.login_window, 'Logged out successfully')
 
-        # Optionally close the current main window
+        # Optionally, if you need to close the current window, use self.close() instead of self.hide()
         # self.close()
-
-    def go_to_create_store_page(self):
-        self.home_page_widget.setCurrentIndex(1)
 
     def go_to_malls_page(self):
         self.fetch_malls_data()
@@ -1510,12 +342,12 @@ class MainAppUI(object):
     @staticmethod
     def fetch_products(mall_id):
         my_cur.execute(
-            "SELECT product_name, product_image, product_price, quantity_in_stock, description, product_id FROM products WHERE mall_id = %s",
+            "SELECT product_name, product_image, product_price, quantity_in_stock, description, product_id, mall_id FROM products WHERE mall_id = %s",
             (mall_id,))
         products = my_cur.fetchall()
         return [
             {"name": row[0], "image": row[1], "price": row[2], "quantity": row[3], "description": row[4],
-             "id": row[5]}
+             "id": row[5], "mall_id": row[6]}
             for row in products]
 
     def populate_grid_layout_2(self, mall_id):
@@ -1537,9 +369,10 @@ class MainAppUI(object):
             name_label.clicked.connect(lambda p=product: self.show_product_details(p))
 
             add_to_cart_button_second = QPushButton("Add to Cart")
-            add_to_cart_button_second.clicked.connect(lambda _, p=product: self.add_to_cart_second(p))
+            add_to_cart_button_second.clicked.connect(lambda _, p=product: self.add_to_cart_second(p, p.get('mall_id')))
             disconnect_button_signals(self.add_to_cart_button)
-            self.add_to_cart_button.clicked.connect(lambda: self.add_to_cart(self.current_product))
+            self.add_to_cart_button.clicked.connect(
+                lambda: self.add_to_cart(self.current_product, self.current_product.get('mall_id')))
 
             row = i // 3
             col = i % 3
@@ -1548,7 +381,7 @@ class MainAppUI(object):
             self.gridLayout_2.addWidget(name_label, row * 3 + 1, col)
             self.gridLayout_2.addWidget(add_to_cart_button_second, row * 3 + 2, col)
 
-    def add_to_cart(self, product):
+    def add_to_cart(self, product, mall_id):
         # Ensure cart_items attribute exists
         if not hasattr(self, 'cart_items'):
             self.cart_items = []
@@ -1557,24 +390,42 @@ class MainAppUI(object):
         quantity = self.quantity_edit.text()
 
         if quantity.isdigit() and int(quantity) > 0:
-            # Add quantity to the product dictionary
-            product_with_quantity = product.copy()
-            product_with_quantity['quantity'] = int(quantity)
+            quantity = int(quantity)
 
-            # Add the product with quantity to the cart
-            self.cart_items.append(product_with_quantity)
+            # Add quantity and mall_id to the product dictionary
+            product_with_details = product.copy()
+            product_with_details['quantity'] = quantity
+            product_with_details['mall_id'] = mall_id  # Add mall_id to the product details
+
+            # Add the product with details to the cart
+            self.cart_items.append(product_with_details)
 
             # Update the shopping cart frame
             self.update_shopping_cart_frame()
 
+            # Update notification
             self.count += 1
             self.notification_label.setText(str(self.count))
             self.notification_label.show()
+
+            # Determine the correct product name
+            product_name = product.get('name', 'Product')  # Default to 'Product' if name is missing
+            if quantity == 1:
+                notification_message = f'{quantity} {product_name} added to cart'
+            else:
+                notification_message = f'{quantity} {product_name}s added to cart'
+
+            self.show_notification_message(notification_message)
         else:
             # Handle invalid quantity input (e.g., show a message to the user)
+            self.show_notification_message("Invalid quantity entered.")
             print("Invalid quantity entered.")
 
-    def add_to_cart_second(self, product):
+    def add_to_cart_second(self, product, mall_id):
+
+        config.product_stock_quantity = product['quantity']
+        print(config.product_stock_quantity)
+
         # Ensure cart_items attribute exists
         if not hasattr(self, 'cart_items'):
             self.cart_items = []
@@ -1584,8 +435,10 @@ class MainAppUI(object):
 
         if quantity.isdigit() and int(quantity) > 0:
             # Add quantity to the product dictionary
+
             product_with_quantity = product.copy()
             product_with_quantity['quantity'] = int(quantity)
+            product_with_quantity['mall_id'] = mall_id
 
             # Add the product with quantity to the cart
             self.cart_items.append(product_with_quantity)
@@ -1610,6 +463,7 @@ class MainAppUI(object):
         self.product_price_label.setText(f"${product['price']}")
         self.quantity_edit.setText('1')
         self.product_stock_quantity_label_.setText(str(product['quantity']))
+        config.product_stock_quantity = product['quantity']
         self.product_description_label.setText(product['description'])
 
     def clear_grid_layout_2(self):
@@ -1624,13 +478,14 @@ class MainAppUI(object):
             QtGui.QPixmap(product['image']).scaled(200, 200, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
         self.product_description_label.setText(product['description'])
         # self.product_price_label.setText(f"Price: ${product['price']}")
-        self.product_stock_quantity_label_.setText(f"Quantity in Stock: {product['quantity']}")
+        self.product_stock_quantity_label_.setText(product['quantity'])
 
     def clear_cart(self):
         self.cart_items = []
         self.notification_label.hide()
         self.count = 0
         self.update_shopping_cart_frame()
+        self.show_notification_message('Cart cleared successfully')
 
     def update_shopping_cart_frame(self):
         # Clear the layouts first
@@ -1694,20 +549,40 @@ class MainAppUI(object):
             mall_name = mall["name"]
             mall_image = mall["logo"]
 
-            image_label = ClickableLabel()
+            # Create a frame for each mall
+            mall_frame = QFrame(self.frame)
+            mall_frame.setStyleSheet("background-color: none; border: 1px solid black;")
+            mall_frame.setFixedSize(200, 200)  # Adjust the size as needed
+
+            # Access existing labels by object name
+            image_label = QLabel(mall_frame)
+            image_label.setObjectName('main_image_label')
+            name_label = QLabel(mall_frame)
+            name_label.setObjectName('main_name_label')
+
+            # Update image and text
             image_label.setPixmap(
-                QtGui.QPixmap(mall_image).scaled(100, 100, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
-            name_label = ClickableLabel(mall_name)
-            name_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+                QtGui.QPixmap(mall_image).scaled(160, 160, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
+            image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            name_label.setText(mall_name)
+            name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-            image_label.clicked.connect(lambda mall=mall: self.print_mall_name(mall))
-            name_label.clicked.connect(lambda mall=mall: self.print_mall_name(mall))
+            # Make the labels clickable
+            image_label.setCursor(Qt.CursorShape.PointingHandCursor)
+            name_label.setCursor(Qt.CursorShape.PointingHandCursor)
+            image_label.mousePressEvent = lambda event, mall=mall: self.go_to_mall(mall)
+            name_label.mousePressEvent = lambda event, mall=mall: self.go_to_mall(mall)
 
+            # Layout for the mall frame
+            mall_layout = QGridLayout(mall_frame)
+            mall_layout.addWidget(image_label, 0, 0)
+            mall_layout.addWidget(name_label, 1, 0)
+            mall_frame.setLayout(mall_layout)
+
+            # Add the mall frame to the main grid layout
             row = i // 3
             col = i % 3
-
-            self.gridLayout.addWidget(image_label, row * 2, col)
-            self.gridLayout.addWidget(name_label, row * 2 + 1, col)
+            self.gridLayout.addWidget(mall_frame, row, col)
 
     def update_grid_layout(self):
         # Clear the existing layout
@@ -1719,64 +594,13 @@ class MainAppUI(object):
         # Repopulate the grid layout with the latest data
         self.populate_grid_layout()
 
-    def print_mall_name(self, mall):
+    def go_to_mall(self, mall):
         print(f"Selected Mall: {mall['name']}")
         add_visit(config.user_id, mall['id'])
+        config.mall_id = mall['id']
         self.home_page_widget.setCurrentIndex(2)
         self.mall_name_label_products.setText(mall['name'])
         self.populate_grid_layout_2(mall['id'])
-
-    @staticmethod
-    def validate_address(address):
-        if not address:
-            return False, "Address cannot be empty."
-
-        # Simple regex to check for at least one number and one letter
-        if not re.match(r'^(?=.*\d)(?=.*[A-Za-z])', address):
-            return False, "Address must contain both letters and numbers."
-
-        return True, "Address seems valid."
-
-    def handle_create_mall(self):
-        mall_name = self.mall_name_edit.text()
-        mall_address = self.mall_address_edit.text()
-        mall_owner = self.mall_owner_edit.text()
-        mall_logo = self.mall_logo_edit.text()
-
-        if not mall_name:
-            print('Input a mall name')
-            return
-
-        if not is_valid_mall_name(mall_name):
-            return
-
-        is_valid, message = self.validate_address(mall_address)
-
-        if not is_valid:
-            show_warning_message("Invalid Address", message)
-            return
-
-        if not validate_user_id(mall_owner):
-            if not config.user_id == mall_owner:
-                print('invalid user id, not your user id')
-                return
-            print('invalid user id')
-            return
-
-        if not mall_logo:
-            return
-
-        mall_id = create_mall_id(mall_owner)
-
-        mall = create_mall(mall_name, mall_address, mall_id, mall_owner, mall_logo)
-
-        if mall:
-            simulate_loading('Mall created successfully')
-            self.clear_inputs_1()
-            self.home_page_widget.setCurrentIndex(0)
-            self.populate_grid_layout()  # Call this method to update the grid layout
-        else:
-            print("Failed to create a mall.")
 
     def clear_inputs_1(self):
         self.mall_name_edit.clear()
@@ -1785,12 +609,27 @@ class MainAppUI(object):
         self.mall_logo_edit.clear()
 
     def buy_products(self):
+        # Validate that quantities in the cart do not exceed available stock
+        for product in self.cart_items:
+            product_id = product['id']
+            requested_quantity = product['quantity']
+
+            # Check if the requested quantity is greater than the available stock
+            if requested_quantity > config.product_stock_quantity:
+                print(config.product_stock_quantity)
+                self.show_notification_message(
+                    f"Cannot purchase {product['name']}. Requested quantity exceeds available stock.")
+                print(f"Error: Cannot purchase {product['name']}. Requested quantity exceeds available stock.")
+                return  # Exit the method if an error is found
+
         # Calculate the total price of the products in the cart
         total_price = sum(product['price'] * product['quantity'] for product in self.cart_items)
 
         try:
             # Check if the account balance is sufficient
             if total_price > config.account_balance:
+                self.show_notification_message(
+                    f"Error: Insufficient balance, you are ${total_price - config.account_balance}short")
                 raise ValueError("Insufficient balance")
 
             # Subtract the total price from the account balance
@@ -1800,8 +639,21 @@ class MainAppUI(object):
             for product in self.cart_items:
                 product_id = product['id']
                 product_quantity = product['quantity']
+                product_stock_quantity = config.product_stock_quantity
+                product_mall_id = product['mall_id']
+                print(product_stock_quantity)
+
+                # Add the purchase
                 add_purchase(config.user_id, product_id, product_quantity,
-                             product['price'] * product_quantity, config.payment_method)
+                             product['price'] * product_quantity, config.payment_method, product_mall_id)
+
+                # Update stock quantity
+                product_stock_quantity -= product_quantity
+                update_product_stock(product_id, product_stock_quantity, config.mall_id)
+                print(product_stock_quantity)
+
+                # Update the product's stock quantity label
+                self.product_stock_quantity_label_.setText(str(product_stock_quantity))
 
             # Clear the cart after purchase
             self.cart_items = []
@@ -1814,202 +666,15 @@ class MainAppUI(object):
             self.account_balance_label.setText(f"{config.account_balance:.2f}")
 
             # Show a success message
+            self.show_notification_message('Your Purchase was successful')
             print("Purchase Successful! The purchase was successful!")
 
-        except ValueError as ve:
-            # Handle specific ValueError
-            print(f"Error: {ve}")
-        except Exception as e:
-            # Handle any other errors
-            print(f"Error: An unexpected error occurred: {e}")
-
-    def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Cipher E-Mall"))
-        self.create_store_submit_button_2.setText(_translate("MainWindow", "Create Store"))
-        self.mall_name_edit.setPlaceholderText(_translate("MainWindow", "Mall Name"))
-        self.fill_in_details_label.setText(_translate("MainWindow",
-                                                      "<html><head/><body><p><span style=\" font-size:18pt; font-weight:600;\">Fill in details to create store</span></p></body></html>"))
-        self.mall_name_label.setText(
-            _translate("MainWindow", "<html><head/><body><p align=\"center\">Mall name:</p></body></html>"))
-        self.mall_address_label.setText(
-            _translate("MainWindow", "<html><head/><body><p align=\"center\">Mall Address:</p></body></html>"))
-        self.mall_owner_label.setText(
-            _translate("MainWindow", "<html><head/><body><p align=\"center\">Mall owner:</p></body></html>"))
-        self.mall_logo_label.setText(
-            _translate("MainWindow", "<html><head/><body><p align=\"center\">Mall logo:</p></body></html>"))
-        self.mall_address_edit.setPlaceholderText(_translate("MainWindow", "Mall Address"))
-        self.mall_owner_edit.setPlaceholderText(_translate("MainWindow", "Mall Owner"))
-        self.mall_logo_edit.setPlaceholderText(_translate("MainWindow", "Mall Logo (image path)"))
-        self.create_store_submit_button.setText(_translate("MainWindow", "Submit"))
-        self.mall_name_label_products.setText(
-            _translate("MainWindow", "<html><head/><body><p align=\"center\">Mall</p></body></html>"))
-        self.back_to_malls_page_button.setText(_translate("MainWindow", "Back"))
-        self.add_to_cart_button.setText(_translate("MainWindow", "Add To Cart"))
-        self.product_name_label.setText(_translate("MainWindow", "Null"))
-        self.product_description_label.setText(_translate("MainWindow", "Null"))
-        self.product_stock_quantity_label_.setText(
-            _translate("MainWindow", "<html><head/><body><p align=\"center\">0</p></body></html>"))
-        self.label.setText(_translate("MainWindow", "Quantity In Stock:"))
-        self.back_to_products_page_button.setText(_translate("MainWindow", "Back"))
-        self.product_price_label.setText(_translate("MainWindow", "0.00"))
-        self.label_3.setText(_translate("MainWindow", "Quantity:"))
-        self.buy_product_button.setText(_translate("MainWindow", "Buy"))
-        self.clear_cart_button.setText(_translate("MainWindow", "Clear"))
-        self.label_6.setText(_translate("MainWindow", "Product"))
-        self.label_10.setText(_translate("MainWindow", "Price"))
-        self.label_11.setText(_translate("MainWindow", "Quantity"))
-        self.label_5.setText(_translate("MainWindow", "Total:"))
-        self.total_price_label.setText(_translate("MainWindow", "0.00"))
-        self.label_7.setText(_translate("MainWindow", "$"))
-        self.profie_username_label.setText(_translate("MainWindow", "None"))
-        self.profile_role_label.setText(_translate("MainWindow", "customer"))
-        self.profie_username_label_3.setText(_translate("MainWindow", "$"))
-        self.profile_uid_label.setText(_translate("MainWindow", "AASSVGD12"))
-        self.label_12.setText(_translate("MainWindow", "Email:"))
-        self.profile_email_label.setText(_translate("MainWindow", "johndoe@gmail.com"))
-        self.label_19.setText(_translate("MainWindow", "Most Recent Purchase:"))
-        self.most_recent_purchase_product_label.setText(_translate("MainWindow", "Product"))
-        self.most_recent_purchase_price_label.setText(_translate("MainWindow", "Price"))
-        self.most_recent_purchase_quantity_label.setText(_translate("MainWindow", "Quantity"))
-        self.label_8.setText(_translate("MainWindow", "Application Statistics"))
-        self.profile_account_balance_label.setText(_translate("MainWindow", "0.00"))
-        self.label_9.setText(_translate("MainWindow", "UID:"))
-        self.total_purchases_label.setText(_translate("MainWindow", "0"))
-        self.label_13.setText(_translate("MainWindow", "Total Purchases"))
-        self.label_14.setText(_translate("MainWindow", "Total Amount Spent"))
-        self.total_amount_spent_label.setText(_translate("MainWindow", "0.00"))
-        self.total_amount_spent_label_2.setText(_translate("MainWindow", "$"))
-        self.total_items_bought_label.setText(_translate("MainWindow", "0"))
-        self.label_15.setText(_translate("MainWindow", "Total Items Bought"))
-        self.most_visited_mall_label.setText(_translate("MainWindow", "None"))
-        self.label_17.setText(_translate("MainWindow", "Most Visited Mall"))
-        self.most_bought_product_label.setText(_translate("MainWindow", "None"))
-        self.label_16.setText(_translate("MainWindow", "Most Bought Product"))
-        self.most_actice_day_of_the_week_label.setText(_translate("MainWindow", "None"))
-        self.label_18.setText(_translate("MainWindow", "Most Active Day of the Week"))
-        self.label_22.setText(_translate("MainWindow", ">"))
-        self.label_24.setText(_translate("MainWindow", ">"))
-        self.label_30.setText(_translate("MainWindow", ">"))
-        self.label_31.setText(_translate("MainWindow", ">"))
-        self.profile_settingsbutton.setText(_translate("MainWindow", "Profile"))
-        self.bank_settingsbutton.setText(_translate("MainWindow", "Bank"))
-        self.tandc_settingsbutton.setText(_translate("MainWindow", "Terms and Conditions"))
-        self.logout_settingsbutton.setText(_translate("MainWindow", "Log Out"))
-        self.upload_new_picture_button.setText(_translate("MainWindow", "Upload new picture"))
-        self.delete_picture_button.setText(_translate("MainWindow", "Delete"))
-        self.label_32.setText(_translate("MainWindow", "Username"))
-        self.save_changes_button.setText(_translate("MainWindow", "Save changes "))
-        self.label_33.setText(_translate("MainWindow", "Email"))
-        self.back_to_settings_page_button.setText(_translate("MainWindow", "Back"))
-        self.save_bank_info_button.setText(_translate("MainWindow", "Save changes"))
-        self.deposit_money_button.setText(_translate("MainWindow", "Deposit"))
-        self.label_35.setText(_translate("MainWindow", "Deposit Money"))
-        self.label_36.setText(_translate("MainWindow", "Enter Amount:"))
-        self.label_37.setText(_translate("MainWindow", "Bank Information"))
-        self.payment_method_combo_box.setItemText(0, _translate("MainWindow", "Credit Card"))
-        self.payment_method_combo_box.setItemText(1, _translate("MainWindow", "Bank Transfer"))
-        self.payment_method_combo_box.setItemText(2, _translate("MainWindow", "E-Bill"))
-        self.payment_method_combo_box.setItemText(3, _translate("MainWindow", "Online Payment"))
-        self.label_38.setText(_translate("MainWindow", "Payment Method:"))
-        self.label_34.setText(_translate("MainWindow", "Card Number:"))
-        self.back_to_settings_page_button_2.setText(_translate("MainWindow", "Back"))
-        self.label_39.setText(_translate("MainWindow", "Terms and Conditions\n"
-                                                       "\n"
-                                                       "Last Updated: [20-12-2098]\n"
-                                                       "\n"
-                                                       "Welcome to Cipher\'s E-Mall! These Terms and Conditions (\"Terms\") govern your use of our website and services. By accessing or using Cipher\'s E-Mall, you agree to comply with and be bound by these Terms. Please read them carefully.\n"
-                                                       "\n"
-                                                       "1. Acceptance of Terms\n"
-                                                       "\n"
-                                                       "By using Cipher\'s E-Mall, you acknowledge that you have read, understood, and agree to be bound by these Terms. If you do not agree with these Terms, please do not use our services.\n"
-                                                       "\n"
-                                                       "2. Changes to Terms\n"
-                                                       "\n"
-                                                       "Cipher\'s E-Mall reserves the right to modify these Terms at any time. Any changes will be posted on this page, and it is your responsibility to review these Terms periodically. Your continued use of the site after changes are made constitutes your acceptance of the new Terms.\n"
-                                                       "\n"
-                                                       "3. Account Registration\n"
-                                                       "\n"
-                                                       "To use certain features of Cipher\'s E-Mall, you may be required to create an account. You agree to provide accurate, complete, and up-to-date information during registration and to update such information to keep it accurate, complete, and current.\n"
-                                                       "\n"
-                                                       "4. User Responsibilities\n"
-                                                       "\n"
-                                                       "You are responsible for maintaining the confidentiality of your account information and for all activities that occur under your account. You agree to notify us immediately of any unauthorized use of your account.\n"
-                                                       "\n"
-                                                       "5. Prohibited Activities\n"
-                                                       "\n"
-                                                       "You agree not to engage in any of the following prohibited activities:\n"
-                                                       "\n"
-                                                       "Violating any applicable laws or regulations.\n"
-                                                       "Posting or transmitting any content that is illegal, harmful, or offensive.\n"
-                                                       "Impersonating any person or entity or falsely stating or misrepresenting your affiliation with a person or entity.\n"
-                                                       "Interfering with or disrupting the Cipher\'s E-Mall website or servers.\n"
-                                                       "Attempting to gain unauthorized access to any part of the website or other systems or networks connected to Cipher\'s E-Mall.\n"
-                                                       "6. Intellectual Property\n"
-                                                       "\n"
-                                                       "All content and materials on Cipher\'s E-Mall, including but not limited to text, graphics, logos, and software, are the property of Cipher\'s E-Mall or its licensors and are protected by copyright, trademark, and other intellectual property laws.\n"
-                                                       "\n"
-                                                       "7. User-Generated Content\n"
-                                                       "\n"
-                                                       "You retain ownership of any content you submit to Cipher\'s E-Mall, but by submitting content, you grant Cipher\'s E-Mall a worldwide, non-exclusive, royalty-free license to use, reproduce, modify, and display such content in connection with our services.\n"
-                                                       "\n"
-                                                       "8. Privacy\n"
-                                                       "\n"
-                                                       "Your use of Cipher\'s E-Mall is also governed by our Privacy Policy. Please review our Privacy Policy to understand how we collect, use, and protect your personal information.\n"
-                                                       "\n"
-                                                       "9. Third-Party Links\n"
-                                                       "\n"
-                                                       "Cipher\'s E-Mall may contain links to third-party websites or services. We are not responsible for the content, privacy practices, or actions of any third parties. Your use of third-party sites is at your own risk.\n"
-                                                       "\n"
-                                                       "10. Disclaimers\n"
-                                                       "\n"
-                                                       "Cipher\'s E-Mall is provided on an \"as is\" and \"as available\" basis. We make no warranties, express or implied, regarding the operation or availability of the website or the accuracy of any information provided.\n"
-                                                       "\n"
-                                                       "11. Limitation of Liability\n"
-                                                       "\n"
-                                                       "To the fullest extent permitted by law, Cipher\'s E-Mall shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data or use.\n"
-                                                       "\n"
-                                                       "12. Indemnification\n"
-                                                       "\n"
-                                                       "You agree to indemnify, defend, and hold harmless Cipher\'s E-Mall, its affiliates, officers, directors, employees, and agents from and against any claims, liabilities, damages, losses, or expenses arising out of your use of the website or violation of these Terms.\n"
-                                                       "\n"
-                                                       "13. Termination\n"
-                                                       "\n"
-                                                       "Cipher\'s E-Mall reserves the right to terminate or suspend your account and access to the website at our sole discretion, without notice, for any reason, including if we believe you have violated these Terms.\n"
-                                                       "\n"
-                                                       "14. Governing Law\n"
-                                                       "\n"
-                                                       "These Terms are governed by and construed in accordance with the laws of [Your Jurisdiction], without regard to its conflict of law principles. Any disputes arising under or in connection with these Terms shall be subject to the exclusive jurisdiction of the courts located in [Your Jurisdiction].\n"
-                                                       "\n"
-                                                       "15. Contact Us\n"
-                                                       "\n"
-                                                       "If you have any questions or concerns about these Terms, please contact us at:\n"
-                                                       "\n"
-                                                       "Cipher\'s E-Mall Support\n"
-                                                       "Email: support@ciphers-emall.com\n"
-                                                       "Address: [Your Address]\n"
-                                                       "\n"
-                                                       ""))
-        self.back_to_settings_page_button_3.setText(_translate("MainWindow", "Back"))
-        self.account_balance_label.setText(_translate("MainWindow", "0.00"))
-        self.label_4.setText(_translate("MainWindow", "<html><head/><body><p align=\"right\">$</p></body></html>"))
-        self.welcome_username_label.setText(_translate("MainWindow", "Welcome"))
-        self.notification_label.setText(_translate("MainWindow", "1"))
-        self.profile_button.setText(_translate("MainWindow", "Profile"))
-        self.settings_button.setText(_translate("MainWindow", "Settings"))
-        self.home_button.setText(_translate("MainWindow", "Home"))
-
-
-class MainApp(QtWidgets.QMainWindow, MainAppUI):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.setupUi(self)  # Set up the UI
+        except ValueError as e:
+            print(f"Error: {e}")
 
 
 if __name__ == "__main__":
-    app = QtWidgets.QApplication([])
-    main_app_window = QtWidgets.QMainWindow()
-    main_app_ui = MainAppUI(main_app_window)
-    main_app_ui.setupUi(main_app_window)
-    main_app_window.show()
+    app = QApplication([])
+    window = MainApp2()
+    window.show()
     app.exec()
