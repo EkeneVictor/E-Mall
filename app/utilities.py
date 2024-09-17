@@ -7,6 +7,9 @@ import ast  # Import the Abstract Syntax Trees module to safely evaluate the str
 import json
 import string
 import random
+from PyQt6.QtCore import QTimer
+from PyQt6.QtWidgets import QGraphicsOpacityEffect
+from PyQt6.QtCore import QPropertyAnimation, QRect, QTimer
 from user import User
 from mall import Mall
 import re
@@ -122,6 +125,79 @@ def simulate_loading(final_text, load_time=3, interval=0.5):
 
     # Print the final text
     print(final_text)
+
+
+def simulate_loading_label(loading_label, final_text="Loading Complete!", load_time=3000, interval=500,
+                           loading_message="Loading", max_dots=3, loading_gif=None):
+    """
+    Simulates a loading process by updating the given label with dots and then displaying a final message.
+
+    Parameters:
+    loading_label (QLabel): The label where the loading message will be displayed.
+    final_text (str): The final message to display after loading is complete.
+    load_time (int): Total duration of the loading process in milliseconds (default is 3000ms or 3 seconds).
+    interval (int): Time interval between each loading dot in milliseconds (default is 500ms).
+    loading_message (str): The base message to display (default is "Loading").
+    max_dots (int): Maximum number of dots to append to the loading message (default is 3).
+    loading_gif (QMovie): Optional, a GIF animation to play during the loading process.
+    """
+
+    # Show the loading label
+    # loading_label.show()
+
+    if loading_gif:
+        # Play the GIF
+        loading_gif.start()
+
+    # Initialize variables to track current dots
+    current_dots = {'value': 0}  # Using a dict to pass by reference to the timer callbacks
+
+    # Function to update the loading message
+    def update_loading_message():
+        current_dots['value'] = (current_dots['value'] + 1) % (max_dots + 1)
+        dots = "." * current_dots['value']
+        loading_label.setText(loading_message + dots)
+
+    # Function to complete loading and display the final message
+    def fade_animation(widget, start_opacity, end_opacity, duration):
+        """
+        Fades the widget opacity from start_opacity to end_opacity over 'duration' milliseconds.
+        """
+        opacity_effect = QGraphicsOpacityEffect()
+        widget.setGraphicsEffect(opacity_effect)
+
+        fade_anim = QPropertyAnimation(opacity_effect, b"opacity")
+        fade_anim.setDuration(duration)
+        fade_anim.setStartValue(start_opacity)
+        fade_anim.setEndValue(end_opacity)
+        fade_anim.start()
+
+    def fade_out_loading(loading_label):
+        """
+        Fade out the loading label and stop the GIF, then hide the label.
+        """
+        fade_animation(loading_label, 1, 0, 3000)  # Fade-out over 1 second
+
+        # After fading out, stop the GIF and hide the label
+        QTimer.singleShot(1000, lambda: loading_label.hide())
+        # self.loading_gif.stop()
+
+    def complete_loading():
+        loading_timer.stop()
+        loading_label.setText(final_text)
+        fade_out_loading(loading_label)
+        if loading_gif:
+            loading_gif.stop()  # Stop the GIF after loading is done
+
+    # Set up the timer to update the label periodically
+    loading_timer = QTimer(loading_label)
+    loading_timer.timeout.connect(update_loading_message)
+
+    # Start the timer
+    loading_timer.start(interval)
+
+    # Stop the timer and show final message after load_time
+    QTimer.singleShot(load_time, complete_loading)
 
 
 def is_valid_email(email):
@@ -659,7 +735,8 @@ def update_product_info(product_id, product_name, product_price, product_quantit
     try:
         try:
             update_product_infos = 'UPDATE products SET product_name = %s, product_price = %s, quantity_in_stock = %s, description = %s, mall_id = %s WHERE product_id = %s'
-            my_cur.execute(update_product_infos,(product_name, product_price, product_quantity, product_description, mall_id, product_id))
+            my_cur.execute(update_product_infos,
+                           (product_name, product_price, product_quantity, product_description, mall_id, product_id))
         except Exception as e:
             print(f'error: {e}')
             traceback.print_exc()
@@ -777,5 +854,6 @@ def create_new_product(product_name, product_price, description, product_image, 
 
     # Notify success
     print(f'Product "{product_name}" created successfully and added to mall {mall_id}.')
+
 
 register_products('MIW289PP')

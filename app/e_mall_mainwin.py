@@ -10,6 +10,8 @@ import config
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6 import uic
+from PyQt6.QtGui import QMovie
+from PyQt6.QtWidgets import QGraphicsOpacityEffect
 from PyQt6.QtCore import QPropertyAnimation, QRect, QTimer
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QFrame, QLabel, QPushButton, QGridLayout
@@ -214,6 +216,7 @@ class MainApp(QMainWindow):
         uic.loadUi('emall.ui', self)
         self.connect_signals()
         self.connect_all()
+        self.loading_label.hide()
         self.sign_in_page.setCurrentIndex(0)
 
     def connect_signals(self):
@@ -272,54 +275,73 @@ class MainApp(QMainWindow):
         user = login(username_or_email, password)
 
         if user:
-            simulate_loading(f'Welcome {user[1]}!!')
-            print(user)
-            config.username = user[1]
-            config.email = user[2]
-            config.password = user[3]
-            config.role = user[4]
-            config.account_balance = user[5]
-            config.user_id = user[0]
-            config.full_name = user[6]
-            config.gov_id = user[7]
-            config.bank_acct_number = user[8]
-            self.clear_inputs()
-            if config.role == 'customer':
-                self.app_stacked_widget.setCurrentIndex(1)
-                self.show_notification_message(f'Welcome, {config.username}!')
-                self.main_stacked_widget.setCurrentIndex(0)
-                self.home_page_widget.setCurrentIndex(0)
-                self.fetch_malls_data()
-                self.welcome_username_label.setText(f'Welcome, {config.username}!!')
-                self.account_balance_label.setText(str(config.account_balance))
+            # Start the loading process
+            self.start_loading(f'Processing')
 
-            elif config.role == 'seller':
-                config.mall_id = user[9]
-                print('seller')
-                self.app_stacked_widget.setCurrentIndex(2)
-                self.show_notification_message(f'Welcome, seller {config.username}!')
-                self.welcome_username_label_2.setText(f'Welcome, seller {config.username}!!')
-                self.account_balance_label_2.setText(str(config.account_balance))
-                # Create chart and series
-                self.chart_frame = self.findChild(QWidget, 'graph_frame')
-                self.chart = QChart()
-                self.chart_view = QChartView(self.chart)
-                self.chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
+            # Delay logic using QTimer for a fake loading experience
+            QTimer.singleShot(5000, lambda: self.process_user_login(user))  # 5 seconds delay before processing login
 
-                # Set layout for the frame and add the chart view
-                layout = QVBoxLayout(self.chart_frame)
-                layout.addWidget(self.chart_view)
-                self.chart_frame.setLayout(layout)
-
-                # Initialize the app by setting default chart data
-                self.initialize_app()
-
-
-            else:
-                self.show_notification_message('An unexpected error occurred')
         else:
             self.show_notification_message('Invalid username or password')
             print('Invalid username or password')
+
+    def process_user_login(self, user):
+        config.username = user[1]
+        config.email = user[2]
+        config.password = user[3]
+        config.role = user[4]
+        config.account_balance = user[5]
+        config.user_id = user[0]
+        config.full_name = user[6]
+        config.gov_id = user[7]
+        config.bank_acct_number = user[8]
+        self.clear_inputs()
+
+        # Based on role, redirect to the appropriate window
+        if config.role == 'customer':
+            self.app_stacked_widget.setCurrentIndex(1)
+            self.show_notification_message(f'Welcome, {config.username}!')
+            self.main_stacked_widget.setCurrentIndex(0)
+            self.home_page_widget.setCurrentIndex(0)
+            self.fetch_malls_data()
+            self.welcome_username_label.setText(f'Welcome, {config.username}!!')
+            self.account_balance_label.setText(str(config.account_balance))
+
+        elif config.role == 'seller':
+            config.mall_id = user[9]
+            print('seller')
+            self.app_stacked_widget.setCurrentIndex(2)
+            self.show_notification_message(f'Welcome, seller {config.username}!')
+            self.welcome_username_label_2.setText(f'Welcome, seller {config.username}!!')
+            self.account_balance_label_2.setText(str(config.account_balance))
+
+            # Create chart and series
+            self.chart_frame = self.findChild(QWidget, 'graph_frame')
+            self.chart = QChart()
+            self.chart_view = QChartView(self.chart)
+            self.chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+            # Set layout for the frame and add the chart view
+            layout = QVBoxLayout(self.chart_frame)
+            layout.addWidget(self.chart_view)
+            self.chart_frame.setLayout(layout)
+
+            # Initialize the app by setting default chart data
+            self.initialize_app()
+
+        else:
+            self.show_notification_message('An unexpected error occurred')
+
+    def start_loading(self, loading_message):
+        """
+        This function shows the loading label, plays the loading GIF, and applies the fade-in animation.
+        """
+
+        # Show the label and start the GIF
+        self.loading_label.show()
+        simulate_loading_label(self.loading_label, final_text="All done!", load_time=5000, interval=300,
+                               loading_message=loading_message, max_dots=5)        # self.loading_gif.start()
+
 
     def enter_sign_up(self):
         self.sign_in_page.setCurrentIndex(1)
@@ -1035,9 +1057,16 @@ class MainApp(QMainWindow):
 
             # Subtract the total price from the account balance
             config.account_balance -= total_price
+            load_time = 300 * len(self.cart_items)
+            print(f'load time: {load_time}')
+
+            self.loading_label.show()
+            simulate_loading_label(self.loading_label, final_text="All done!", load_time=load_time, interval=200,
+                                   loading_message='Processing', max_dots=3)
 
             # Iterate over the cart items and add each purchase
             for product in self.cart_items:
+
                 product_id = product['id']
                 product_quantity = product['quantity']
                 product_stock_quantity = config.product_stock_quantity
@@ -1166,7 +1195,7 @@ class MainApp(QMainWindow):
         except (ValueError, TypeError):
             order_conversion_rate_value = 0
 
-        self.order_conversion_rate_label.setText(f'{order_conversion_rate_value}')
+        self.order_conversion_rate_label.setText(f'{order_conversion_rate_value:.2f}')
         print(order_conversion_rate_value)
 
         # Handle layout adjustment for order conversion rate

@@ -7089,6 +7089,39 @@ color: white</string>
        <bool>true</bool>
       </property>
      </widget>
+     <widget class="QLabel" name="loading_label">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>400</x>
+        <y>270</y>
+        <width>100</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(34, 55, 172);
+border-radius: 10px;
+color: white</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="page_7"/>
    </widget>
@@ -7096,7 +7129,6 @@ color: white</string>
  </widget>
  <resources>
   <include location="icons.qrc"/>
-  <include location="../.designer/backup/icons.qrc"/>
  </resources>
  <connections/>
 </ui>
