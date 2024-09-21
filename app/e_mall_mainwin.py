@@ -1607,6 +1607,3 @@ if __name__ == "__main__":
     window = MainApp()
     window.show()
     app.exec()
-
-# Fac_eless10.aternos.me
-# 30030

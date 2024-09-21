@@ -1,5 +1,4 @@
 import datetime
-from decimal import Decimal
 import pymysql as sql
 import traceback
 import time
@@ -7,11 +6,9 @@ import ast  # Import the Abstract Syntax Trees module to safely evaluate the str
 import json
 import string
 import random
-from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QGraphicsOpacityEffect
-from PyQt6.QtCore import QPropertyAnimation, QRect, QTimer
-from user import User
-from mall import Mall
+from PyQt6.QtCore import QPropertyAnimation, QTimer
+from app.mall import Mall
 import re
 from PyQt6.QtWidgets import QMessageBox, QWidget
 import config
@@ -404,30 +401,30 @@ def fetch_statistics():
 
 
 def update_account_info(username, email, user_id):
-    from main_app_ui import MainApp2
-    window = MainApp2()
+    from e_mall_mainwin import MainApp
+    window = MainApp()
     if username == config.username:
         pass
     else:
         if not username:
-            MainApp2.show_notification_message(window, "Please enter new username.")
+            MainApp.show_notification_message(window, "Please enter new username.")
             print("Please enter new username.")
             return
 
         if not confirm_user_name(username):
-            MainApp2.show_notification_message(window, 'username already exists')
+            MainApp.show_notification_message(window, 'username already exists')
             return
 
     if email == config.email:
         pass
     else:
         if not is_valid_email(email):
-            MainApp2.show_notification_message(window, 'Please input a valid email')
+            MainApp.show_notification_message(window, 'Please input a valid email')
             print("Please input a valid email.")
             return
 
         if not confirm_email(email):
-            MainApp2.show_notification_message(window, 'email already exists')
+            MainApp.show_notification_message(window, 'email already exists')
             return
 
     update_user_info = 'UPDATE users SET username = %s, email = %s WHERE user_id = %s'
@@ -854,6 +851,3 @@ def create_new_product(product_name, product_price, description, product_image, 
 
     # Notify success
     print(f'Product "{product_name}" created successfully and added to mall {mall_id}.')
-
-
-register_products('MIW289PP')
