@@ -50,7 +50,7 @@
 ### Installation:
 1. Clone this repository:
    ```bash
-   git clone https://github.com/your-username/cipher-emall.git
+   git clone https://github.com/EkeneVictor/E-Mall.git
 2. Install the required dependencies:
    ```bash
    pip install -r requirements.txt
